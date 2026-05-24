@@ -1,14 +1,13 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Button, Grid } from 'antd';
+import { Menu, Grid, Drawer } from 'antd';
 import {
   TeamOutlined, AppstoreOutlined, UserOutlined,
-  MenuFoldOutlined, MenuUnfoldOutlined, LogoutOutlined,
+  MenuOutlined, LogoutOutlined,
   DashboardOutlined, SettingOutlined, BellOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../lib/auth-context';
 
-const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
 
 const menuItems = [
@@ -25,104 +24,227 @@ const menuItems = [
   ]},
 ];
 
+const CLAMP = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
+  const [pos, setPos] = useState({ x: 12, y: 12 });
   const { logout, email } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
-  const handleMenuClick = (info: { key: string }) => {
-    navigate(info.key);
-  };
+  const dragging = useRef(false);
+  const dragHead = useRef({ x: 0, y: 0, px: 0, py: 0 });
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const userInitials = email ? email.substring(0, 2).toUpperCase() : 'SA';
 
-  return (
-    <Layout style={{ minHeight: '100vh', background: 'var(--color-bg-body)' }}>
-      <Sider
-        trigger={null}
-        collapsible
-        collapsed={collapsed || isMobile}
-        width={220}
-        collapsedWidth={isMobile ? 0 : 72}
+  const handleDragStart = useCallback((clientX: number, clientY: number) => {
+    dragging.current = true;
+    dragHead.current = { x: clientX, y: clientY, px: pos.x, py: pos.y };
+  }, [pos]);
+
+  const handleDragMove = useCallback((clientX: number, clientY: number) => {
+    if (!dragging.current) return;
+    const dx = clientX - dragHead.current.x;
+    const dy = clientY - dragHead.current.y;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const pw = collapsed ? 44 : 230;
+    setPos({
+      x: CLAMP(dragHead.current.px + dx, 0, w - pw - 8),
+      y: CLAMP(dragHead.current.py + dy, 0, h - 80),
+    });
+  }, [collapsed]);
+
+  const handleDragEnd = useCallback(() => {
+    dragging.current = false;
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) {
+      const onMove = (e: MouseEvent | TouchEvent) => {
+        const cx = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
+        const cy = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
+        handleDragMove(cx, cy);
+      };
+      const onEnd = () => handleDragEnd();
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onEnd);
+      window.addEventListener('touchmove', onMove, { passive: true });
+      window.addEventListener('touchend', onEnd);
+      return () => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onEnd);
+        window.removeEventListener('touchmove', onMove);
+        window.removeEventListener('touchend', onEnd);
+      };
+    }
+  }, [isMobile, handleDragMove, handleDragEnd]);
+
+  const sidebarContent = (
+    <div style={{
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      background: 'var(--color-bg-card)',
+    }}>
+      <div
+        className="sidebar-drag-handle"
         style={{
-          background: 'var(--color-bg-card)',
-          borderRight: '1px solid var(--color-border)',
-          overflow: 'auto',
-          position: isMobile ? 'fixed' : 'relative',
-          zIndex: 100,
-          height: '100vh',
-        }}
-      >
-        <div style={{
           height: 56,
           display: 'flex',
           alignItems: 'center',
           gap: 10,
-          padding: collapsed || isMobile ? '0 16px' : '0 18px',
+          padding: '0 18px',
           borderBottom: '1px solid var(--color-border)',
-        }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: 'var(--color-primary)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <span style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>S</span>
-          </div>
-          {!collapsed && !isMobile && (
-            <div style={{ lineHeight: 1.2 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-title)' }}>SaaS Admin</div>
-              <div style={{ fontSize: 10, color: 'var(--color-text-light)' }}>Panel de control</div>
-            </div>
-          )}
-        </div>
-
-        <Menu
-          theme="light"
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          defaultOpenKeys={['gestion', 'sistema']}
-          items={menuItems}
-          onClick={handleMenuClick}
-          style={{ border: 'none', background: 'transparent', padding: '8px 8px', fontSize: 13 }}
-        />
-
+          cursor: 'grab',
+          userSelect: 'none',
+        }}
+        onMouseDown={(e) => { if (!isMobile) handleDragStart(e.clientX, e.clientY); }}
+        onTouchStart={(e) => { if (!isMobile) handleDragStart(e.touches[0].clientX, e.touches[0].clientY); }}
+      >
         <div style={{
-          padding: '12px 14px',
-          borderTop: '1px solid var(--color-border)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 9,
-          position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          background: 'var(--color-bg-card)',
+          width: 32, height: 32, borderRadius: 8,
+          background: 'var(--color-primary)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
         }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
-          }}>
-            {userInitials}
-          </div>
-          {!collapsed && !isMobile && (
-            <>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-title)' }}>{email}</div>
-                <div style={{ fontSize: 10, color: 'var(--color-text-light)' }}>Super Admin</div>
-              </div>
-              <LogoutOutlined style={{ fontSize: 14, color: 'var(--color-text-light)', cursor: 'pointer' }} onClick={logout} />
-            </>
-          )}
+          <span style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>S</span>
         </div>
-      </Sider>
+        <div style={{ lineHeight: 1.2, flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-title)' }}>SaaS Admin</div>
+          <div style={{ fontSize: 10, color: 'var(--color-text-light)' }}>Panel de control</div>
+        </div>
+        <div
+          className="sidebar-collapse-btn"
+          onClick={() => setCollapsed(true)}
+          style={{
+            width: 22, height: 22, borderRadius: '50%',
+            background: 'var(--color-border-light)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', fontSize: 14, fontWeight: 600,
+            color: 'var(--color-text-secondary)', lineHeight: 1,
+            flexShrink: 0,
+          }}
+        >
+          −
+        </div>
+      </div>
 
-      <Layout style={{ marginLeft: isMobile ? 0 : undefined }}>
-        <Header style={{
+      <Menu
+        theme="light"
+        mode="inline"
+        selectedKeys={[location.pathname]}
+        defaultOpenKeys={['gestion', 'sistema']}
+        items={menuItems}
+        onClick={(info) => { navigate(info.key); if (isMobile) setCollapsed(false); }}
+        style={{
+          border: 'none', background: 'transparent',
+          padding: '8px 8px', fontSize: 13, flex: 1,
+        }}
+      />
+
+      <div style={{
+        padding: '12px 14px',
+        borderTop: '1px solid var(--color-border)',
+        display: 'flex', alignItems: 'center', gap: 9,
+        background: 'var(--color-bg-card)',
+      }}>
+        <div style={{
+          width: 30, height: 30, borderRadius: '50%',
+          background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
+        }}>
+          {userInitials}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-title)' }}>{email}</div>
+          <div style={{ fontSize: 10, color: 'var(--color-text-light)' }}>Super Admin</div>
+        </div>
+        <LogoutOutlined style={{ fontSize: 14, color: 'var(--color-text-light)', cursor: 'pointer' }} onClick={logout} />
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-body)' }}>
+      {/* Desktop draggable sidebar */}
+      {!isMobile && collapsed && (
+        <div
+          className="sidebar-float-icon"
+          onClick={() => setCollapsed(false)}
+          onMouseDown={(e) => { e.stopPropagation(); handleDragStart(e.clientX, e.clientY); }}
+          onTouchStart={(e) => { e.stopPropagation(); handleDragStart(e.touches[0].clientX, e.touches[0].clientY); }}
+          style={{
+            position: 'fixed',
+            left: pos.x,
+            top: pos.y,
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: 'var(--color-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'grab',
+            zIndex: 100,
+            boxShadow: '0 4px 16px rgba(249, 115, 22, 0.35)',
+            transition: 'box-shadow 0.2s',
+            userSelect: 'none',
+            color: '#fff',
+            fontSize: 20,
+          }}
+        >
+          <MenuOutlined />
+        </div>
+      )}
+
+      {!isMobile && !collapsed && (
+        <aside
+          ref={panelRef}
+          className="sidebar-floating"
+          style={{
+            position: 'fixed',
+            left: pos.x,
+            top: pos.y,
+            width: 230,
+            background: 'var(--color-bg-card)',
+            borderRadius: 14,
+            border: '1px solid var(--color-border)',
+            boxShadow: '0 4px 24px rgba(16, 24, 40, 0.1)',
+            zIndex: 100,
+            overflow: 'hidden',
+            transition: dragging.current ? 'none' : 'box-shadow 0.2s',
+          }}
+        >
+          {sidebarContent}
+        </aside>
+      )}
+
+      {/* Mobile drawer */}
+      {isMobile && (
+        <Drawer
+          placement="left"
+          open={!collapsed}
+          onClose={() => setCollapsed(true)}
+          width={260}
+          styles={{ body: { padding: 0 } }}
+          closeIcon={null}
+        >
+          {sidebarContent}
+        </Drawer>
+      )}
+
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        <header style={{
           padding: '0 22px',
           height: 54,
           background: 'var(--color-bg-card)',
@@ -130,14 +252,23 @@ export default function Dashboard() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Button
-              type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
-              style={{ color: 'var(--color-text-secondary)', fontSize: 16 }}
-            />
+            {isMobile && (
+              <div
+                onClick={() => setCollapsed(false)}
+                style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', color: 'var(--color-text-secondary)', fontSize: 16,
+                }}
+              >
+                <MenuOutlined />
+              </div>
+            )}
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text-title)' }}>Dashboard</div>
               <div style={{ fontSize: 11, color: 'var(--color-text-light)' }}>Panel de administración</div>
@@ -169,12 +300,12 @@ export default function Dashboard() {
               {userInitials}
             </div>
           </div>
-        </Header>
+        </header>
 
-        <Content style={{ padding: '18px 22px' }}>
+        <main style={{ padding: '18px 22px', flex: 1, maxWidth: '100%' }}>
           <Outlet />
-        </Content>
-      </Layout>
-    </Layout>
+        </main>
+      </div>
+    </div>
   );
 }
