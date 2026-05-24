@@ -1,9 +1,10 @@
-namespace Backend.Infrastructure.Cache.Redis;
-
+using Backend.Application.Common.Interfaces;
 using StackExchange.Redis;
 using System.Text.Json;
 
-public class RedisCacheService
+namespace Backend.Infrastructure.Cache.Redis;
+
+public class RedisCacheService : ICacheService
 {
     private readonly IDatabase _database;
 

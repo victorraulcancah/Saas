@@ -1,20 +1,17 @@
 using Backend.Domain.Common;
-using Backend.Infrastructure.Persistence.PostgreSQL;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Backend_Saas.Data;
+namespace Backend.Infrastructure.Persistence.PostgreSQL;
 
 public static class SeedData
 {
     public static async Task Initialize(IServiceProvider serviceProvider)
     {
-        using var scope = serviceProvider.CreateScope();
-        var sp = scope.ServiceProvider;
-
-        var roleManager = sp.GetRequiredService<RoleManager<ApplicationRole>>();
-        var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
-        var db = sp.GetRequiredService<AppDbContext>();
+        var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var db = serviceProvider.GetRequiredService<AppDbContext>();
 
         if (await db.Modules.AnyAsync()) return;
 

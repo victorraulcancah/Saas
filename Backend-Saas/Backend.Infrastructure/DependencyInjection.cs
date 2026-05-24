@@ -3,6 +3,7 @@ namespace Backend.Infrastructure;
 using Backend.Application.Common.Interfaces;
 using Backend.Domain.Common;
 using Backend.Infrastructure.Cache.Redis;
+using Backend.Infrastructure.Persistence.MongoDB;
 using Backend.Infrastructure.Persistence.PostgreSQL;
 using Backend.Infrastructure.Services;
 using Backend.Infrastructure.Settings;
@@ -33,6 +34,14 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ITenantService, TenantService>();
+        services.AddScoped<ITenantModuleService, TenantModuleService>();
+        services.AddScoped<ITenantUserService, TenantUserService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IModuleService, ModuleService>();
+        services.AddScoped<IAdminUserService, AdminUserService>();
+        services.AddScoped<IAdminRoleService, AdminRoleService>();
+        services.AddScoped<IAuditService, MongoAuditService>();
+        services.AddSingleton<ICacheService, RedisCacheService>();
         services.AddHttpContextAccessor();
 
         var redisConnectionString = configuration.GetConnectionString("Redis");

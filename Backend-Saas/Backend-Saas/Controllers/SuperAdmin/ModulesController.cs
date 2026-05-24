@@ -1,9 +1,7 @@
-using Backend.Domain.Common;
-using Backend.Infrastructure.Persistence.PostgreSQL;
+using Backend.Application.Common.Interfaces;
 using Backend_Saas.DTOs.Module;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Backend_Saas.Controllers.SuperAdmin;
 
@@ -12,17 +10,17 @@ namespace Backend_Saas.Controllers.SuperAdmin;
 [Authorize(Roles = "SuperAdmin")]
 public class ModulesController : ControllerBase
 {
-    private readonly AppDbContext _db;
+    private readonly IModuleService _moduleService;
 
-    public ModulesController(AppDbContext db)
+    public ModulesController(IModuleService moduleService)
     {
-        _db = db;
+        _moduleService = moduleService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var modules = await _db.Modules.AsNoTracking().ToListAsync();
+        var modules = await _moduleService.GetAllModulesAsync();
         var response = modules.Select(m => new ModuleResponse(m.Id, m.Name, m.Key, m.Description, m.Icon));
         return Ok(response);
     }
@@ -30,20 +28,7 @@ public class ModulesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateModuleRequest request)
     {
-        var module = new Module
-        {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            Key = request.Key,
-            Description = request.Description,
-            Icon = request.Icon,
-            IsActive = true
-        };
-
-        _db.Modules.Add(module);
-        await _db.SaveChangesAsync();
+        var module = await _moduleService.CreateModuleAsync(request.Name, request.Key, request.Description, request.Icon);
         return Ok(new ModuleResponse(module.Id, module.Name, module.Key, module.Description, module.Icon));
     }
 }
-
-public record CreateModuleRequest(string Name, string Key, string? Description, string? Icon);

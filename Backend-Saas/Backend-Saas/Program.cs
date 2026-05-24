@@ -1,7 +1,6 @@
 using System.Text;
 using Backend.Infrastructure;
 using Backend.Infrastructure.Persistence.PostgreSQL;
-using Backend_Saas.Data;
 using Backend_Saas.Hubs;
 using Backend_Saas.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -54,6 +53,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseMiddleware<TenantMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
