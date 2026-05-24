@@ -1,8 +1,9 @@
 namespace Backend.Domain.CRM.Entities;
 
 using Backend.Domain.Common;
+using Backend.Domain.Common.Interfaces;
 
-public class SalesOrderItem : BaseEntity
+public class SalesOrderItem : BaseEntity, ISoftDelete
 {
     public Guid SalesOrderId { get; set; }
     public virtual SalesOrder SalesOrder { get; set; } = null!;

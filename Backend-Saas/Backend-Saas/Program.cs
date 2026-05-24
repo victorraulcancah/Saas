@@ -5,7 +5,6 @@ using Backend_Saas.Hubs;
 using Backend_Saas.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -36,6 +35,17 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? ["http://localhost:5173"])
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -50,8 +60,10 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "SaaS API v1"));
 }
 
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseMiddleware<TenantMiddleware>();

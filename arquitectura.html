@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquitectura de Sistema</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    width: 100%;
+    max-width: 860px;
+  }
+
+  /* ── Bloques ── */
+  .block {
+    border-radius: 10px;
+    padding: 14px 24px;
+    text-align: center;
+    cursor: default;
+    transition: filter .2s;
+  }
+  .block:hover { filter: brightness(1.12); }
+
+  .block .title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .block .sub {
+    font-size: .75rem;
+    color: rgba(255,255,255,.78);
+    margin-top: 3px;
+  }
+
+  /* colores */
+  .c-client   { background: #4a4a4a; }
+  .c-gateway  { background: #4b4aaf; }
+  .c-redis    { background: #8b5e10; }
+  .c-service  { background: #1a6b5a; }
+  .c-broker   { background: #7a2020; }
+  .c-pg       { background: #1b4f8a; }
+  .c-mongo    { background: #3a6b1a; }
+
+  /* ── Fila ── */
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 16px;
+    position: relative;
+  }
+
+  /* ── Conectores SVG ── */
+  .connector {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  /* contenedor relativo para el SVG */
+  .rel {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Sección gateway (gateway + redis en misma fila) ── */
+  .gateway-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+    gap: 20px;
+    position: relative;
+  }
+  .gateway-row .gateway-block { flex: 0 0 360px; }
+
+  /* ── Espaciadores de flecha ── */
+  .arrow-gap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .arrow-gap svg { display: block; }
+
+  /* ── Servicios ── */
+  .services-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+  }
+  .services-row .block { flex: 1; max-width: 240px; }
+
+  /* ── DBs ── */
+  .db-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+  }
+  .db-row .block { flex: 1; max-width: 240px; }
+
+  /* ── Broker ── */
+  .broker-block { width: 340px; }
+
+  /* ── Leyenda ── */
+  .legend {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 32px;
+    font-size: .78rem;
+    color: #555;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .legend-dot {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+  }
+
+  /* ── SVG arrows full-width ── */
+  .arrows-svg {
+    width: 100%;
+    overflow: visible;
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+
+  <!-- CLIENTES -->
+  <div class="block c-client" style="width:320px;">
+    <div style="font-size:.7rem;color:rgba(255,255,255,.6);margin-bottom:2px;">Web · Mobile · Third-party</div>
+    <div class="title">Clientes</div>
+  </div>
+
+  <!-- Flecha cliente → gateway -->
+  <svg class="arrows-svg" height="40" viewBox="0 0 860 40">
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="#888"/>
+      </marker>
+    </defs>
+    <line x1="430" y1="0" x2="430" y2="32" stroke="#888" stroke-width="1.5" marker-end="url(#arr)"/>
+  </svg>
+
+  <!-- GATEWAY + REDIS -->
+  <div class="gateway-row">
+    <div class="block c-gateway gateway-block">
+      <div class="title">API Gateway</div>
+      <div class="sub">Auth · Rate limiting · Routing</div>
+    </div>
+    <!-- flecha punteada a Redis -->
+    <svg width="80" height="50" style="flex-shrink:0;" overflow="visible">
+      <defs>
+        <marker id="arr2" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#888"/>
+        </marker>
+      </defs>
+      <line x1="0" y1="25" x2="68" y2="25" stroke="#888" stroke-width="1.4"
+            stroke-dasharray="5,4" marker-end="url(#arr2)"/>
+    </svg>
+    <div class="block c-redis">
+      <div class="title">Redis</div>
+      <div class="sub">Cache · Sesiones</div>
+    </div>
+  </div>
+
+  <!-- Flechas gateway → 3 servicios -->
+  <svg class="arrows-svg" height="56" viewBox="0 0 860 56">
+    <defs>
+      <marker id="arr3" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="#888"/>
+      </marker>
+    </defs>
+    <!-- línea horizontal -->
+    <line x1="240" y1="8" x2="620" y2="8" stroke="#888" stroke-width="1.4"/>
+    <!-- bajada izquierda (ERP) -->
+    <line x1="240" y1="8" x2="240" y2="48" stroke="#888" stroke-width="1.4" marker-end="url(#arr3)"/>
+    <!-- bajada centro (HR) -->
+    <line x1="430" y1="0" x2="430" y2="48" stroke="#888" stroke-width="1.4" marker-end="url(#arr3)"/>
+    <!-- bajada derecha (CRM) -->
+    <line x1="620" y1="8" x2="620" y2="48" stroke="#888" stroke-width="1.4" marker-end="url(#arr3)"/>
+  </svg>
+
+  <!-- SERVICIOS -->
+  <div class="services-row">
+    <div class="block c-service">
+      <div class="title">ERP Service</div>
+      <div class="sub">Finanzas · Inventario</div>
+    </div>
+    <div class="block c-service">
+      <div class="title">HR Service</div>
+      <div class="sub">Empleados · Nómina</div>
+    </div>
+    <div class="block c-service">
+      <div class="title">CRM Service</div>
+      <div class="sub">Clientes · Pipeline · Soporte</div>
+    </div>
+  </div>
+
+  <!-- Flechas servicios → broker + dbs -->
+  <svg class="arrows-svg" height="80" viewBox="0 0 860 80">
+    <defs>
+      <marker id="arr4" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="#888"/>
+      </marker>
+      <marker id="arr4d" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="#888"/>
+      </marker>
+    </defs>
+    <!-- ERP → PostgreSQL izquierda (sólida) -->
+    <line x1="240" y1="0" x2="240" y2="72" stroke="#888" stroke-width="1.4" marker-end="url(#arr4)"/>
+    <!-- HR → MongoDB centro (sólida) -->
+    <line x1="430" y1="0" x2="430" y2="72" stroke="#888" stroke-width="1.4" marker-end="url(#arr4)"/>
+    <!-- CRM → PostgreSQL derecha (sólida) -->
+    <line x1="620" y1="0" x2="620" y2="72" stroke="#888" stroke-width="1.4" marker-end="url(#arr4)"/>
+    <!-- ERP → broker (punteada) -->
+    <line x1="240" y1="10" x2="392" y2="38" stroke="#888" stroke-width="1.4"
+          stroke-dasharray="5,4" marker-end="url(#arr4d)"/>
+    <!-- CRM → broker (punteada) -->
+    <line x1="620" y1="10" x2="468" y2="38" stroke="#888" stroke-width="1.4"
+          stroke-dasharray="5,4" marker-end="url(#arr4d)"/>
+    <!-- HR → broker (sólida) -->
+    <line x1="430" y1="10" x2="430" y2="38" stroke="#888" stroke-width="1.4" marker-end="url(#arr4)"/>
+  </svg>
+
+  <!-- BROKER centrado sobre el espacio de flechas; lo ponemos aquí con posición relativa -->
+  <div style="display:flex; width:100%; justify-content:center; margin-top:-52px; margin-bottom:16px; position:relative; z-index:1;">
+    <div class="block c-broker broker-block">
+      <div class="title">Message Broker</div>
+    </div>
+  </div>
+
+  <!-- espacio para las flechas → dbs -->
+  <svg class="arrows-svg" height="20" viewBox="0 0 860 20"></svg>
+
+  <!-- DBS -->
+  <div class="db-row">
+    <div class="block c-pg">
+      <div class="title">PostgreSQL</div>
+      <div class="sub">ERP · transaccional</div>
+    </div>
+    <div class="block c-mongo">
+      <div class="title">MongoDB</div>
+      <div class="sub">HR · documentos flexibles</div>
+    </div>
+    <div class="block c-pg">
+      <div class="title">PostgreSQL</div>
+      <div class="sub">CRM · relacional</div>
+    </div>
+  </div>
+
+  <!-- LEYENDA -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#1a6b5a;"></div>
+      Servicios de negocio
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#1b4f8a;"></div>
+      Bases relacionales
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#3a6b1a;"></div>
+      Base documental
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#8b5e10;"></div>
+      Caché
+    </div>
+    <div style="width:100%;text-align:center;font-size:.72rem;color:#999;margin-top:4px;">
+      Haz clic en cualquier bloque para profundizar
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

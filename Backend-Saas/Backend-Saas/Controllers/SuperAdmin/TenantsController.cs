@@ -25,7 +25,7 @@ public class TenantsController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var tenants = await _tenantService.GetAllTenantsAsync();
-        var response = tenants.Select(t => new TenantResponse(t.Id, t.Name, t.Slug, t.Email, t.IsActive, t.SubscriptionPlan, t.CreatedAt));
+        var response = tenants.Select(MapResponse);
         return Ok(response);
     }
 
@@ -34,21 +34,38 @@ public class TenantsController : ControllerBase
     {
         var tenant = await _tenantService.GetTenantByIdAsync(id);
         if (tenant is null) return NotFound();
-        return Ok(new TenantResponse(tenant.Id, tenant.Name, tenant.Slug, tenant.Email, tenant.IsActive, tenant.SubscriptionPlan, tenant.CreatedAt));
+        return Ok(MapResponse(tenant));
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateTenantRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateTenantApiRequest request)
     {
-        var tenant = await _tenantService.CreateTenantAsync(request.Name, request.Slug, request.Email, request.SubscriptionPlan);
-        return Ok(new TenantResponse(tenant.Id, tenant.Name, tenant.Slug, tenant.Email, tenant.IsActive, tenant.SubscriptionPlan, tenant.CreatedAt));
+        var tenant = await _tenantService.CreateTenantAsync(new CreateTenantRequest(
+            request.Name, request.Slug, request.Ruc, request.RazonSocial,
+            request.NombreComercial, request.Email, request.EmailFacturacion,
+            request.Phone, request.TelefonoSecundario, request.Address,
+            request.DireccionFiscal, request.Ubigeo, request.Departamento,
+            request.Provincia, request.Distrito, request.Website,
+            request.LogoBase64, request.ClaveSol, request.CertificadoPem,
+            request.CertificadoPassword, request.SubscriptionPlan
+        ));
+        return Ok(MapResponse(tenant));
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTenantRequest request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTenantApiRequest request)
     {
-        var tenant = await _tenantService.UpdateTenantAsync(id, request.Name, request.Slug, request.Email, request.SubscriptionPlan, request.IsActive);
-        return Ok(new TenantResponse(tenant.Id, tenant.Name, tenant.Slug, tenant.Email, tenant.IsActive, tenant.SubscriptionPlan, tenant.CreatedAt));
+        var tenant = await _tenantService.UpdateTenantAsync(id, new UpdateTenantRequest(
+            request.Name, request.Slug, request.Ruc, request.RazonSocial,
+            request.NombreComercial, request.Email, request.EmailFacturacion,
+            request.Phone, request.TelefonoSecundario, request.Address,
+            request.DireccionFiscal, request.Ubigeo, request.Departamento,
+            request.Provincia, request.Distrito, request.Website,
+            request.LogoBase64, request.ClaveSol, request.CertificadoPem,
+            request.CertificadoPassword, request.SubscriptionPlan,
+            request.IsActive
+        ));
+        return Ok(MapResponse(tenant));
     }
 
     [HttpDelete("{id:guid}")]
@@ -110,4 +127,12 @@ public class TenantsController : ControllerBase
 
         return Ok(new { message = "Tenant aprovisionado", userId = user.Id });
     }
+
+    private static TenantResponse MapResponse(Backend.Domain.Common.Tenant t) => new(
+        t.Id, t.Name, t.Slug, t.Ruc, t.RazonSocial, t.NombreComercial,
+        t.Email, t.EmailFacturacion, t.Phone, t.TelefonoSecundario,
+        t.Address, t.DireccionFiscal, t.Ubigeo, t.Departamento,
+        t.Provincia, t.Distrito, t.Website, t.LogoBase64,
+        t.IsActive, t.SubscriptionPlan, t.CreatedAt
+    );
 }

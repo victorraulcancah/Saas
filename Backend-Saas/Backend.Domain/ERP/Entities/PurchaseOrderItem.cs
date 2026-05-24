@@ -1,8 +1,9 @@
 namespace Backend.Domain.ERP.Entities;
 
 using Backend.Domain.Common;
+using Backend.Domain.Common.Interfaces;
 
-public class PurchaseOrderItem : BaseEntity
+public class PurchaseOrderItem : BaseEntity, ISoftDelete
 {
     public Guid PurchaseOrderId { get; set; }
     public virtual PurchaseOrder PurchaseOrder { get; set; } = null!;
