@@ -3,13 +3,15 @@ namespace Backend.Domain.ERP.Entities;
 using Backend.Domain.Common;
 using Backend.Domain.Common.Interfaces;
 
-public class InventoryMovement : BaseEntity, ITenantEntity
+public class ProductStock : BaseEntity, ITenantEntity
 {
-    public enum MovementType
+    public enum StockCondition
     {
-        Entry,
-        Exit,
-        Transfer
+        Available,
+        Reserved,
+        Damaged,
+        Expired,
+        Quarantine
     }
 
     public Guid? TenantId { get; set; }
@@ -19,12 +21,8 @@ public class InventoryMovement : BaseEntity, ITenantEntity
     public virtual Warehouse Warehouse { get; set; } = null!;
     public Guid? WarehouseLocationId { get; set; }
     public virtual WarehouseLocation? WarehouseLocation { get; set; }
-    public MovementType Type { get; set; }
-    public int Quantity { get; set; }
-    public decimal UnitPrice { get; set; }
-    public string Reference { get; set; } = string.Empty;
-    public string Notes { get; set; } = string.Empty;
-    public string Reason { get; set; } = string.Empty;
     public string LotNumber { get; set; } = string.Empty;
     public DateTime? ExpirationDate { get; set; }
+    public int Quantity { get; set; }
+    public StockCondition Condition { get; set; } = StockCondition.Available;
 }

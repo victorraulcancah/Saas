@@ -1,6 +1,7 @@
 namespace Backend.Infrastructure;
 
 using Backend.Application.Common.Interfaces;
+using Backend.Application.ERP.Services;
 using Backend.Domain.Common;
 using Backend.Infrastructure.Cache.Redis;
 using Backend.Infrastructure.Persistence.MongoDB;
@@ -40,6 +41,11 @@ public static class DependencyInjection
         services.AddScoped<ISaasLicenseService, SaasLicenseService>();
         services.AddScoped<ISaasAccessService, SaasAccessService>();
         services.AddScoped<ISaasSubscriptionService, SaasSubscriptionService>();
+        services.AddScoped<ErpStockService>();
+        services.AddScoped<IErpCatalogService, ErpCatalogService>();
+        services.AddScoped<IErpInventoryService, ErpInventoryService>();
+        services.AddScoped<IErpPurchasingService, ErpPurchasingService>();
+        services.AddScoped<IErpBillingService, ErpBillingService>();
         services.AddScoped<IAdminUserService, AdminUserService>();
         services.AddScoped<IAdminRoleService, AdminRoleService>();
         services.AddScoped<IAuditService, MongoAuditService>();

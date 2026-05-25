@@ -198,6 +198,30 @@ public static class SeedData
             DisplayOrder = 2
         };
 
+        var compras = new SaasModule
+        {
+            Id = Guid.NewGuid(),
+            SystemId = erp.Id,
+            Name = "Compras y Proveedores",
+            Key = "compras-proveedores",
+            Description = "Gestión de proveedores, órdenes de compra, recepción y cuentas por pagar",
+            Icon = "shopping-cart",
+            BasePath = "/erp/compras-proveedores",
+            DisplayOrder = 3
+        };
+
+        var finanzas = new SaasModule
+        {
+            Id = Guid.NewGuid(),
+            SystemId = erp.Id,
+            Name = "Finanzas y Contabilidad",
+            Key = "finanzas-contabilidad",
+            Description = "Contabilidad, cuentas por cobrar/pagar, flujo de caja y reportes financieros",
+            Icon = "chart-no-axes-combined",
+            BasePath = "/erp/finanzas-contabilidad",
+            DisplayOrder = 4
+        };
+
         var clientes = new SaasModule
         {
             Id = Guid.NewGuid(),
@@ -230,6 +254,12 @@ public static class SeedData
             new SaasSubModule { Id = Guid.NewGuid(), ModuleId = inventario.Id, Name = "Productos", Key = "productos", Description = "Catálogo de productos y categorías", RoutePath = "/erp/inventario/productos", DisplayOrder = 1 },
             new SaasSubModule { Id = Guid.NewGuid(), ModuleId = inventario.Id, Name = "Kardex", Key = "kardex", Description = "Movimientos, valorización y trazabilidad de stock", RoutePath = "/erp/inventario/kardex", DisplayOrder = 2 },
             new SaasSubModule { Id = Guid.NewGuid(), ModuleId = inventario.Id, Name = "Almacenes", Key = "almacenes", Description = "Almacenes, ubicaciones y transferencias", RoutePath = "/erp/inventario/almacenes", DisplayOrder = 3 },
+            new SaasSubModule { Id = Guid.NewGuid(), ModuleId = compras.Id, Name = "Proveedores", Key = "proveedores", Description = "Registro, evaluación y gestión de proveedores", RoutePath = "/erp/compras-proveedores/proveedores", DisplayOrder = 1 },
+            new SaasSubModule { Id = Guid.NewGuid(), ModuleId = compras.Id, Name = "Órdenes de compra", Key = "ordenes-compra", Description = "Solicitudes, aprobación y seguimiento de órdenes de compra", RoutePath = "/erp/compras-proveedores/ordenes-compra", DisplayOrder = 2 },
+            new SaasSubModule { Id = Guid.NewGuid(), ModuleId = compras.Id, Name = "Recepción de mercadería", Key = "recepcion-mercaderia", Description = "Conformidad, recepción y vínculo con inventario", RoutePath = "/erp/compras-proveedores/recepcion-mercaderia", DisplayOrder = 3 },
+            new SaasSubModule { Id = Guid.NewGuid(), ModuleId = finanzas.Id, Name = "Contabilidad general", Key = "contabilidad-general", Description = "Libro diario, libro mayor y plan contable", RoutePath = "/erp/finanzas-contabilidad/contabilidad-general", DisplayOrder = 1 },
+            new SaasSubModule { Id = Guid.NewGuid(), ModuleId = finanzas.Id, Name = "Cuentas por cobrar y pagar", Key = "cuentas-cobrar-pagar", Description = "Obligaciones, vencimientos, cobros y pagos", RoutePath = "/erp/finanzas-contabilidad/cuentas-cobrar-pagar", DisplayOrder = 2 },
+            new SaasSubModule { Id = Guid.NewGuid(), ModuleId = finanzas.Id, Name = "Flujo de caja", Key = "flujo-caja", Description = "Ingresos, egresos y proyección de caja", RoutePath = "/erp/finanzas-contabilidad/flujo-caja", DisplayOrder = 3 },
             new SaasSubModule { Id = Guid.NewGuid(), ModuleId = clientes.Id, Name = "Cartera de clientes", Key = "cartera", Description = "Registro, edición y consulta de clientes", RoutePath = "/crm/clientes/cartera", DisplayOrder = 1 },
             new SaasSubModule { Id = Guid.NewGuid(), ModuleId = clientes.Id, Name = "Actividades comerciales", Key = "actividades", Description = "Seguimientos, llamadas, reuniones y recordatorios", RoutePath = "/crm/clientes/actividades", DisplayOrder = 2 },
             new SaasSubModule { Id = Guid.NewGuid(), ModuleId = recursosHumanos.Id, Name = "Empleados", Key = "empleados", Description = "Legajo digital y datos laborales", RoutePath = "/rh/personal/empleados", DisplayOrder = 1 },
@@ -252,7 +282,7 @@ public static class SeedData
         };
 
         db.SaasSystems.AddRange(saas, erp, crm, rh);
-        db.SaasModules.AddRange(catalog, tenants, billing, sunat, facturacion, inventario, clientes, recursosHumanos);
+        db.SaasModules.AddRange(catalog, tenants, billing, sunat, facturacion, inventario, compras, finanzas, clientes, recursosHumanos);
         db.SaasSubModules.AddRange(subModules);
         db.SaasSubModules.AddRange(businessSubModules);
         db.SaasPlans.Add(starter);
@@ -268,6 +298,7 @@ public static class SeedData
             new PlanModule { PlanId = starter.Id, ModuleId = sunat.Id },
             new PlanModule { PlanId = starter.Id, ModuleId = facturacion.Id },
             new PlanModule { PlanId = starter.Id, ModuleId = inventario.Id },
+            new PlanModule { PlanId = starter.Id, ModuleId = compras.Id },
             new PlanModule { PlanId = starter.Id, ModuleId = clientes.Id }
         );
         db.PlanSubModules.AddRange(subModules.Select(sm => new PlanSubModule { PlanId = starter.Id, SubModuleId = sm.Id }));
@@ -310,7 +341,7 @@ public static class SeedData
                 SaasModuleId = sm.ModuleId,
                 SaasSubModuleId = sm.Id,
                 Name = $"Ver {sm.Name}",
-                Key = $"{GetSystemKey(sm.ModuleId, facturacion.Id, inventario.Id, clientes.Id, recursosHumanos.Id)}.{GetModuleKey(sm.ModuleId, facturacion.Id, inventario.Id, clientes.Id, recursosHumanos.Id)}.{sm.Key}.ver",
+                Key = $"{GetSystemKey(sm.ModuleId, clientes.Id, recursosHumanos.Id)}.{GetModuleKey(sm.ModuleId, facturacion.Id, inventario.Id, compras.Id, finanzas.Id, clientes.Id, recursosHumanos.Id)}.{sm.Key}.ver",
                 Action = "view",
                 Description = $"Permite visualizar {sm.Name}"
             },
@@ -321,7 +352,7 @@ public static class SeedData
                 SaasModuleId = sm.ModuleId,
                 SaasSubModuleId = sm.Id,
                 Name = $"Administrar {sm.Name}",
-                Key = $"{GetSystemKey(sm.ModuleId, facturacion.Id, inventario.Id, clientes.Id, recursosHumanos.Id)}.{GetModuleKey(sm.ModuleId, facturacion.Id, inventario.Id, clientes.Id, recursosHumanos.Id)}.{sm.Key}.administrar",
+                Key = $"{GetSystemKey(sm.ModuleId, clientes.Id, recursosHumanos.Id)}.{GetModuleKey(sm.ModuleId, facturacion.Id, inventario.Id, compras.Id, finanzas.Id, clientes.Id, recursosHumanos.Id)}.{sm.Key}.administrar",
                 Action = "manage",
                 Description = $"Permite administrar {sm.Name}"
             }
@@ -330,15 +361,17 @@ public static class SeedData
         await db.SaveChangesAsync();
     }
 
-    private static string GetSystemKey(Guid moduleId, Guid facturacionId, Guid inventarioId, Guid clientesId, Guid recursosHumanosId)
+    private static string GetSystemKey(Guid moduleId, Guid clientesId, Guid recursosHumanosId)
     {
         return moduleId == clientesId ? "crm" : moduleId == recursosHumanosId ? "rh" : "erp";
     }
 
-    private static string GetModuleKey(Guid moduleId, Guid facturacionId, Guid inventarioId, Guid clientesId, Guid recursosHumanosId)
+    private static string GetModuleKey(Guid moduleId, Guid facturacionId, Guid inventarioId, Guid comprasId, Guid finanzasId, Guid clientesId, Guid recursosHumanosId)
     {
         if (moduleId == facturacionId) return "facturacion";
         if (moduleId == inventarioId) return "inventario";
+        if (moduleId == comprasId) return "compras-proveedores";
+        if (moduleId == finanzasId) return "finanzas-contabilidad";
         if (moduleId == clientesId) return "clientes";
         return "personal";
     }

@@ -1,8 +1,10 @@
 using System.Text;
+using Backend.Application.Common.Interfaces;
 using Backend.Infrastructure;
 using Backend.Infrastructure.Persistence.PostgreSQL;
 using Backend_Saas.Hubs;
 using Backend_Saas.Middleware;
+using Backend_Saas.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IRealtimeNotificationService, SignalRRealtimeNotificationService>();
 
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 var jwtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["SecretKey"]!));

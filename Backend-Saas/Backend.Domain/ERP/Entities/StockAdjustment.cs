@@ -3,28 +3,30 @@ namespace Backend.Domain.ERP.Entities;
 using Backend.Domain.Common;
 using Backend.Domain.Common.Interfaces;
 
-public class InventoryMovement : BaseEntity, ITenantEntity
+public class StockAdjustment : BaseEntity, ITenantEntity
 {
-    public enum MovementType
+    public enum StockAdjustmentType
     {
         Entry,
         Exit,
-        Transfer
+        Loss,
+        Damaged,
+        Expired,
+        CustomerReturn,
+        SupplierReturn,
+        CountCorrection
     }
 
     public Guid? TenantId { get; set; }
+    public string AdjustmentNumber { get; set; } = string.Empty;
     public Guid ProductId { get; set; }
     public virtual Product Product { get; set; } = null!;
     public Guid WarehouseId { get; set; }
     public virtual Warehouse Warehouse { get; set; } = null!;
     public Guid? WarehouseLocationId { get; set; }
-    public virtual WarehouseLocation? WarehouseLocation { get; set; }
-    public MovementType Type { get; set; }
-    public int Quantity { get; set; }
-    public decimal UnitPrice { get; set; }
-    public string Reference { get; set; } = string.Empty;
-    public string Notes { get; set; } = string.Empty;
-    public string Reason { get; set; } = string.Empty;
     public string LotNumber { get; set; } = string.Empty;
     public DateTime? ExpirationDate { get; set; }
+    public StockAdjustmentType Type { get; set; }
+    public int Quantity { get; set; }
+    public string Reason { get; set; } = string.Empty;
 }

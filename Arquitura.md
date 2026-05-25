@@ -137,3 +137,17 @@ backend/
     "DatabaseName": "saas_erp_logs"
   }
 }
+0. Plataforma SaaS Central
+1. ERP
+2. POS
+3. CRM
+4. RH
+5. OMS
+6. WMS
+7. TMS
+8. PIM
+9. SFA
+10. Help Desk
+11. Retail Analytics
+12. Prevención de Pérdidas
+13. BI
