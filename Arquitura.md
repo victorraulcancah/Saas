@@ -112,3 +112,28 @@ backend/
 | ERP · transaccional | HR · documentos flexibles | CRM · relacional |
 
 ---
+
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "AllowedOrigins": ["http://localhost:5173", "http://localhost:4173"],
+  "ConnectionStrings": {
+    "PostgreSQL": "Host=localhost;Port=5432;Database=saas_erp;Username=postgres;Password=",
+    "Redis": "localhost:6379",
+    "MongoDB": "mongodb://localhost:27017"
+  },
+  "JwtSettings": {
+    "SecretKey": "SuperSecretKeyForJwtToken_ChangeInProduction_Min32Chars!",
+    "Issuer": "BackendSaas",
+    "Audience": "BackendSaasClient",
+    "ExpirationHours": 8
+  },
+  "MongoDBSettings": {
+    "DatabaseName": "saas_erp_logs"
+  }
+}

@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, type ReactNode } from 'react';
 import { Table, Grid, Dropdown, Checkbox } from 'antd';
-import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
+import type { ColumnsType } from 'antd/es/table';
 import { SettingOutlined } from '@ant-design/icons';
 import PageHeader from './PageHeader';
 import EntityModal from './EntityModal';
@@ -111,13 +111,6 @@ export default function CrudTable<T>({
     });
   };
 
-  const pagination: TablePaginationConfig = {
-    pageSize: 10,
-    showSizeChanger: !isMobile,
-    showTotal: !isMobile ? (total: number) => `${total} registros` : undefined,
-    responsive: true,
-  };
-
   const dropdownItems = {
     items: toggleable.map((col) => ({
       key: col.key,
@@ -164,9 +157,9 @@ export default function CrudTable<T>({
             columns={colsWithDrag}
             rowKey={rowKey}
             loading={loading}
-            pagination={pagination}
-            scroll={{ x: isMobile ? 600 : undefined }}
-            size={isMobile ? 'small' : 'middle'}
+            pagination={false}
+            scroll={{ x: 700 }}
+            size="small"
             locale={{ emptyText: 'Sin registros' }}
             bordered
           />

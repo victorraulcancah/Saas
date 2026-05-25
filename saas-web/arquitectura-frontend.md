@@ -19,7 +19,7 @@
 ## Estructura de Carpetas
 
 ```
-ferreteria2/
+saas-web/
 ├── app/                            ← App Router (páginas y layouts)
 │   ├── layout.tsx                  ← Root layout (AuthProvider, AntdRegistry, ConfigProvider, Providers)
 │   ├── providers.tsx               ← TanStack Query + Firebase/Echo/Birthday initializers

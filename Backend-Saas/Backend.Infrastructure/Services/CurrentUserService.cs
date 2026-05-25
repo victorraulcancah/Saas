@@ -35,5 +35,5 @@ public class CurrentUserService : ICurrentUserService
 
     public string? Role => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Role);
 
-    public bool IsSuperAdmin => _httpContextAccessor.HttpContext?.User?.FindFirstValue("TenantId") is null;
+    public bool IsSuperAdmin => Role == "SuperAdmin";
 }

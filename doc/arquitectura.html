@@ -54,7 +54,9 @@
   .c-redis    { background: #8b5e10; }
   .c-service  { background: #1a6b5a; }
   .c-broker   { background: #7a2020; }
-  .c-pg       { background: #1b4f8a; }
+  .c-db1      { background: #1b4f8a; }
+  .c-db2      { background: #3a6b1a; }
+  .c-db3      { background: #6b3f8a; }
   .c-mongo    { background: #3a6b1a; }
 
   /* ── Fila ── */
@@ -108,10 +110,10 @@
   .services-row {
     display: flex;
     justify-content: center;
-    gap: 16px;
+    gap: 12px;
     width: 100%;
   }
-  .services-row .block { flex: 1; max-width: 240px; }
+  .services-row .block { flex: 1; max-width: 200px; min-width: 0; }
 
   /* ── DBs ── */
   .db-row {
@@ -124,6 +126,25 @@
 
   /* ── Broker ── */
   .broker-block { width: 340px; }
+
+  /* ── DB badges en servicios ── */
+  .db-badges {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 6px;
+  }
+  .db-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    opacity: 0.2;
+  }
+  .db-dot.on  { opacity: 1; }
+  .db-dot.d1  { background: #1b4f8a; }
+  .db-dot.d2  { background: #3a6b1a; }
+  .db-dot.d3  { background: #6b3f8a; }
 
   /* ── Leyenda ── */
   .legend {
@@ -195,88 +216,109 @@
     </div>
   </div>
 
-  <!-- Flechas gateway → 3 servicios -->
+  <!-- Flechas gateway → servicios -->
   <svg class="arrows-svg" height="56" viewBox="0 0 860 56">
     <defs>
       <marker id="arr3" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
         <path d="M0,0 L8,4 L0,8 Z" fill="#888"/>
       </marker>
     </defs>
-    <!-- línea horizontal -->
-    <line x1="240" y1="8" x2="620" y2="8" stroke="#888" stroke-width="1.4"/>
-    <!-- bajada izquierda (ERP) -->
-    <line x1="240" y1="8" x2="240" y2="48" stroke="#888" stroke-width="1.4" marker-end="url(#arr3)"/>
-    <!-- bajada centro (HR) -->
+    <line x1="130" y1="8" x2="730" y2="8" stroke="#888" stroke-width="1.4"/>
+    <!-- row 1 -->
+    <line x1="220" y1="8" x2="220" y2="48" stroke="#888" stroke-width="1.4" marker-end="url(#arr3)"/>
     <line x1="430" y1="0" x2="430" y2="48" stroke="#888" stroke-width="1.4" marker-end="url(#arr3)"/>
-    <!-- bajada derecha (CRM) -->
-    <line x1="620" y1="8" x2="620" y2="48" stroke="#888" stroke-width="1.4" marker-end="url(#arr3)"/>
+    <line x1="640" y1="8" x2="640" y2="48" stroke="#888" stroke-width="1.4" marker-end="url(#arr3)"/>
   </svg>
 
-  <!-- SERVICIOS -->
+  <!-- SERVICIOS ROW 1 -->
   <div class="services-row">
     <div class="block c-service">
       <div class="title">ERP Service</div>
-      <div class="sub">Finanzas · Inventario</div>
+      <div class="sub">Finanzas · Inventario · Contabilidad</div>
+      <div class="db-badges"><span class="db-dot d1 on"></span></div>
     </div>
     <div class="block c-service">
       <div class="title">HR Service</div>
-      <div class="sub">Empleados · Nómina</div>
+      <div class="sub">Empleados · Nómina · Asistencia</div>
+      <div class="db-badges"><span class="db-dot d2 on"></span></div>
     </div>
     <div class="block c-service">
       <div class="title">CRM Service</div>
-      <div class="sub">Clientes · Pipeline · Soporte</div>
+      <div class="sub">Clientes · Pipeline · Soporte · Marketing</div>
+      <div class="db-badges"><span class="db-dot d3 on"></span></div>
     </div>
   </div>
 
-  <!-- Flechas servicios → broker + dbs -->
-  <svg class="arrows-svg" height="80" viewBox="0 0 860 80">
+  <!-- SERVICIOS ROW 2 -->
+  <div class="services-row">
+    <div class="block c-service">
+      <div class="title">POS Service</div>
+      <div class="sub">Ventas rápidas · Pagos · Stock</div>
+      <div class="db-badges"><span class="db-dot d1 on"></span><span class="db-dot d3 on"></span></div>
+    </div>
+    <div class="block c-service">
+      <div class="title">WMS Service</div>
+      <div class="sub">Almacenes · Ubicaciones · Picking</div>
+      <div class="db-badges"><span class="db-dot d1 on"></span></div>
+    </div>
+    <div class="block c-service">
+      <div class="title">TMS Service</div>
+      <div class="sub">Despachos · Rutas · Tracking</div>
+      <div class="db-badges"><span class="db-dot d1 on"></span></div>
+    </div>
+    <div class="block c-service">
+      <div class="title">BI Service</div>
+      <div class="sub">Dashboards · KPIs · Reportes</div>
+      <div class="db-badges"><span class="db-dot d1 on"></span><span class="db-dot d2 on"></span><span class="db-dot d3 on"></span></div>
+    </div>
+  </div>
+
+  <!-- Flechas servicios → broker -->
+  <svg class="arrows-svg" height="36" viewBox="0 0 860 36">
     <defs>
       <marker id="arr4" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
         <path d="M0,0 L8,4 L0,8 Z" fill="#888"/>
       </marker>
-      <marker id="arr4d" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+    </defs>
+    <line x1="220" y1="0" x2="220" y2="28" stroke="#888" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arr4)"/>
+    <line x1="430" y1="0" x2="430" y2="28" stroke="#888" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arr4)"/>
+    <line x1="640" y1="0" x2="640" y2="28" stroke="#888" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arr4)"/>
+    <line x1="120" y1="0" x2="120" y2="28" stroke="#888" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arr4)"/>
+    <line x1="320" y1="0" x2="320" y2="28" stroke="#888" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arr4)"/>
+    <line x1="540" y1="0" x2="540" y2="28" stroke="#888" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arr4)"/>
+    <line x1="740" y1="0" x2="740" y2="28" stroke="#888" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arr4)"/>
+  </svg>
+
+  <!-- BROKER -->
+  <div class="block c-broker broker-block">
+    <div class="title">Message Broker</div>
+  </div>
+
+  <!-- Flechas broker → dbs -->
+  <svg class="arrows-svg" height="36" viewBox="0 0 860 36">
+    <defs>
+      <marker id="arr5" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
         <path d="M0,0 L8,4 L0,8 Z" fill="#888"/>
       </marker>
     </defs>
-    <!-- ERP → PostgreSQL izquierda (sólida) -->
-    <line x1="240" y1="0" x2="240" y2="72" stroke="#888" stroke-width="1.4" marker-end="url(#arr4)"/>
-    <!-- HR → MongoDB centro (sólida) -->
-    <line x1="430" y1="0" x2="430" y2="72" stroke="#888" stroke-width="1.4" marker-end="url(#arr4)"/>
-    <!-- CRM → PostgreSQL derecha (sólida) -->
-    <line x1="620" y1="0" x2="620" y2="72" stroke="#888" stroke-width="1.4" marker-end="url(#arr4)"/>
-    <!-- ERP → broker (punteada) -->
-    <line x1="240" y1="10" x2="392" y2="38" stroke="#888" stroke-width="1.4"
-          stroke-dasharray="5,4" marker-end="url(#arr4d)"/>
-    <!-- CRM → broker (punteada) -->
-    <line x1="620" y1="10" x2="468" y2="38" stroke="#888" stroke-width="1.4"
-          stroke-dasharray="5,4" marker-end="url(#arr4d)"/>
-    <!-- HR → broker (sólida) -->
-    <line x1="430" y1="10" x2="430" y2="38" stroke="#888" stroke-width="1.4" marker-end="url(#arr4)"/>
+    <line x1="180" y1="0" x2="180" y2="28" stroke="#888" stroke-width="1.4" marker-end="url(#arr5)"/>
+    <line x1="430" y1="0" x2="430" y2="28" stroke="#888" stroke-width="1.4" marker-end="url(#arr5)"/>
+    <line x1="680" y1="0" x2="680" y2="28" stroke="#888" stroke-width="1.4" marker-end="url(#arr5)"/>
   </svg>
-
-  <!-- BROKER centrado sobre el espacio de flechas; lo ponemos aquí con posición relativa -->
-  <div style="display:flex; width:100%; justify-content:center; margin-top:-52px; margin-bottom:16px; position:relative; z-index:1;">
-    <div class="block c-broker broker-block">
-      <div class="title">Message Broker</div>
-    </div>
-  </div>
-
-  <!-- espacio para las flechas → dbs -->
-  <svg class="arrows-svg" height="20" viewBox="0 0 860 20"></svg>
 
   <!-- DBS -->
   <div class="db-row">
-    <div class="block c-pg">
+    <div class="block c-db1">
       <div class="title">PostgreSQL</div>
-      <div class="sub">ERP · transaccional</div>
+      <div class="sub">ERP · Finanzas · Inventario</div>
     </div>
     <div class="block c-mongo">
       <div class="title">MongoDB</div>
       <div class="sub">HR · documentos flexibles</div>
     </div>
-    <div class="block c-pg">
+    <div class="block c-db3">
       <div class="title">PostgreSQL</div>
-      <div class="sub">CRM · relacional</div>
+      <div class="sub">CRM · Ventas · Clientes</div>
     </div>
   </div>
 
@@ -288,15 +330,22 @@
     </div>
     <div class="legend-item">
       <div class="legend-dot" style="background:#1b4f8a;"></div>
-      Bases relacionales
+      PostgreSQL — ERP (transaccional)
     </div>
     <div class="legend-item">
       <div class="legend-dot" style="background:#3a6b1a;"></div>
-      Base documental
+      MongoDB — HR (documentos)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#6b3f8a;"></div>
+      PostgreSQL — CRM (relacional)
     </div>
     <div class="legend-item">
       <div class="legend-dot" style="background:#8b5e10;"></div>
       Caché
+    </div>
+    <div style="width:100%;text-align:center;font-size:.72rem;color:#999;margin-top:4px;">
+      ● = usa esta base de datos
     </div>
     <div style="width:100%;text-align:center;font-size:.72rem;color:#999;margin-top:4px;">
       Haz clic en cualquier bloque para profundizar

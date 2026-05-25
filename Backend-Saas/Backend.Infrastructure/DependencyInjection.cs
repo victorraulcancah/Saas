@@ -34,10 +34,12 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ITenantService, TenantService>();
-        services.AddScoped<ITenantModuleService, TenantModuleService>();
         services.AddScoped<ITenantUserService, TenantUserService>();
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IModuleService, ModuleService>();
+        services.AddScoped<ISaasCatalogService, SaasCatalogService>();
+        services.AddScoped<ISaasLicenseService, SaasLicenseService>();
+        services.AddScoped<ISaasAccessService, SaasAccessService>();
+        services.AddScoped<ISaasSubscriptionService, SaasSubscriptionService>();
         services.AddScoped<IAdminUserService, AdminUserService>();
         services.AddScoped<IAdminRoleService, AdminRoleService>();
         services.AddScoped<IAuditService, MongoAuditService>();

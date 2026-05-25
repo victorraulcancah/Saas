@@ -1,5 +1,7 @@
 namespace Backend.Domain.Common;
 
+using Backend.Domain.Saas.Entities;
+
 public class Tenant
 {
     public Guid Id { get; set; }
@@ -27,5 +29,13 @@ public class Tenant
     public string? SubscriptionPlan { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
-    public ICollection<TenantModule> TenantModules { get; set; } = new List<TenantModule>();
+    public TenantCompanyProfile? CompanyProfile { get; set; }
+    public TenantSunatCredential? SunatCredential { get; set; }
+    public ICollection<TenantBranch> Branches { get; set; } = new List<TenantBranch>();
+    public ICollection<TenantCertificate> Certificates { get; set; } = new List<TenantCertificate>();
+    public ICollection<InvoiceSeries> InvoiceSeries { get; set; } = new List<InvoiceSeries>();
+    public ICollection<TenantSubscription> Subscriptions { get; set; } = new List<TenantSubscription>();
+    public ICollection<TenantSystemLicense> SystemLicenses { get; set; } = new List<TenantSystemLicense>();
+    public ICollection<TenantModuleLicense> ModuleLicenses { get; set; } = new List<TenantModuleLicense>();
+    public ICollection<TenantSubModuleLicense> SubModuleLicenses { get; set; } = new List<TenantSubModuleLicense>();
 }

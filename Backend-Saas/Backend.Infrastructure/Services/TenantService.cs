@@ -1,5 +1,6 @@
 using Backend.Application.Common.Interfaces;
 using Backend.Domain.Common;
+using Backend.Domain.Saas.Entities;
 using Backend.Infrastructure.Persistence.PostgreSQL;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,6 +48,60 @@ public class TenantService : ITenantService
         };
 
         _context.Tenants.Add(tenant);
+        _context.TenantCompanyProfiles.Add(new TenantCompanyProfile
+        {
+            TenantId = tenant.Id,
+            Ruc = request.Ruc,
+            RazonSocial = request.RazonSocial,
+            NombreComercial = request.NombreComercial,
+            EmailFacturacion = request.EmailFacturacion,
+            Phone = request.Phone,
+            DireccionFiscal = request.DireccionFiscal ?? request.Address ?? string.Empty,
+            Ubigeo = request.Ubigeo ?? string.Empty,
+            Departamento = request.Departamento ?? string.Empty,
+            Provincia = request.Provincia ?? string.Empty,
+            Distrito = request.Distrito ?? string.Empty
+        });
+
+        _context.TenantBranches.Add(new TenantBranch
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenant.Id,
+            Name = "Principal",
+            Code = "MAIN",
+            SunatEstablishmentCode = "0000",
+            Address = request.DireccionFiscal ?? request.Address ?? string.Empty,
+            Ubigeo = request.Ubigeo ?? string.Empty,
+            Departamento = request.Departamento ?? string.Empty,
+            Provincia = request.Provincia ?? string.Empty,
+            Distrito = request.Distrito ?? string.Empty,
+            IsMain = true
+        });
+
+        if (!string.IsNullOrWhiteSpace(request.ClaveSol))
+        {
+            _context.TenantSunatCredentials.Add(new TenantSunatCredential
+            {
+                TenantId = tenant.Id,
+                Environment = "Beta",
+                SendMode = "DirectSunat",
+                EncryptedSolPassword = request.ClaveSol
+            });
+        }
+
+        if (request.CertificadoPem is { Length: > 0 })
+        {
+            _context.TenantCertificates.Add(new TenantCertificate
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenant.Id,
+                Name = "Certificado principal",
+                Format = "PEM",
+                CertificateContent = request.CertificadoPem,
+                EncryptedPassword = request.CertificadoPassword
+            });
+        }
+
         await _context.SaveChangesAsync();
         await _audit.LogAsync("CREATE", "Tenant", tenant.Id.ToString(), $"Tenant {request.Name} creado");
         return tenant;
@@ -55,8 +110,11 @@ public class TenantService : ITenantService
     public async Task<Tenant?> GetTenantByIdAsync(Guid id)
     {
         return await _context.Tenants
-            .Include(t => t.TenantModules)
-            .ThenInclude(tm => tm.Module)
+            .Include(t => t.CompanyProfile)
+            .Include(t => t.SunatCredential)
+            .Include(t => t.Branches)
+            .Include(t => t.Certificates)
+            .Include(t => t.Subscriptions)
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 
@@ -89,6 +147,60 @@ public class TenantService : ITenantService
         tenant.IsActive = request.IsActive;
         tenant.UpdatedAt = DateTime.UtcNow;
 
+        var profile = await _context.TenantCompanyProfiles.FindAsync(id);
+        if (profile is null)
+        {
+            profile = new TenantCompanyProfile { TenantId = id };
+            _context.TenantCompanyProfiles.Add(profile);
+        }
+
+        profile.Ruc = request.Ruc;
+        profile.RazonSocial = request.RazonSocial;
+        profile.NombreComercial = request.NombreComercial;
+        profile.EmailFacturacion = request.EmailFacturacion;
+        profile.Phone = request.Phone;
+        profile.DireccionFiscal = request.DireccionFiscal ?? request.Address ?? string.Empty;
+        profile.Ubigeo = request.Ubigeo ?? string.Empty;
+        profile.Departamento = request.Departamento ?? string.Empty;
+        profile.Provincia = request.Provincia ?? string.Empty;
+        profile.Distrito = request.Distrito ?? string.Empty;
+        profile.UpdatedAt = DateTime.UtcNow;
+
+        var sunat = await _context.TenantSunatCredentials.FindAsync(id);
+        if (!string.IsNullOrWhiteSpace(request.ClaveSol))
+        {
+            if (sunat is null)
+            {
+                sunat = new TenantSunatCredential { TenantId = id };
+                _context.TenantSunatCredentials.Add(sunat);
+            }
+
+            sunat.EncryptedSolPassword = request.ClaveSol;
+            sunat.UpdatedAt = DateTime.UtcNow;
+        }
+
+        if (request.CertificadoPem is { Length: > 0 })
+        {
+            var certificate = await _context.TenantCertificates
+                .FirstOrDefaultAsync(c => c.TenantId == id && c.IsActive);
+
+            if (certificate is null)
+            {
+                certificate = new TenantCertificate
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = id,
+                    Name = "Certificado principal",
+                    Format = "PEM"
+                };
+                _context.TenantCertificates.Add(certificate);
+            }
+
+            certificate.CertificateContent = request.CertificadoPem;
+            certificate.EncryptedPassword = request.CertificadoPassword;
+            certificate.UpdatedAt = DateTime.UtcNow;
+        }
+
         await _context.SaveChangesAsync();
         await _audit.LogAsync("UPDATE", "Tenant", id.ToString(), $"Tenant {request.Name} actualizado");
         return tenant;
@@ -108,8 +220,8 @@ public class TenantService : ITenantService
     public async Task<IEnumerable<Tenant>> GetAllTenantsAsync()
     {
         return await _context.Tenants
-            .Include(t => t.TenantModules)
-            .ThenInclude(tm => tm.Module)
+            .Include(t => t.CompanyProfile)
+            .Include(t => t.Branches)
             .ToListAsync();
     }
 

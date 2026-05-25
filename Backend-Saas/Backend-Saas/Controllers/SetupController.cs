@@ -24,7 +24,7 @@ public class SetupController : ControllerBase
     [HttpPost("seed")]
     public async Task<IActionResult> Seed()
     {
-        if (await _db.Modules.AnyAsync())
+        if (await _db.SaasSystems.AnyAsync())
             return Ok(new { message = "Ya hay datos semilla. No se ejecutó el seed." });
 
         var superAdminRole = new ApplicationRole
@@ -66,15 +66,7 @@ public class SetupController : ControllerBase
                 await _userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
         }
 
-        var mods = new[]
-        {
-            new Module { Id = Guid.NewGuid(), Name = "Facturación SAT", Key = "facturacion", Icon = "receipt", BasePath = "/facturacion", DisplayOrder = 1, IsActive = true },
-            new Module { Id = Guid.NewGuid(), Name = "Inventarios", Key = "inventarios", Icon = "inventory", BasePath = "/inventarios", DisplayOrder = 2, IsActive = true },
-            new Module { Id = Guid.NewGuid(), Name = "Clientes", Key = "clientes", Icon = "people", BasePath = "/clientes", DisplayOrder = 3, IsActive = true },
-            new Module { Id = Guid.NewGuid(), Name = "Recursos Humanos", Key = "rh", Icon = "badge", BasePath = "/rh", DisplayOrder = 4, IsActive = true },
-        };
-        _db.Modules.AddRange(mods);
-        await _db.SaveChangesAsync();
+        await SeedData.Initialize(HttpContext.RequestServices);
 
         return Ok(new { message = "Seed ejecutado correctamente. SuperAdmin: admin@saas.com / Admin123!" });
     }
@@ -88,7 +80,9 @@ public class SetupController : ControllerBase
         {
             superAdminExists = admin is not null,
             roles = roles,
-            modulesCount = await _db.Modules.CountAsync(),
+            systemsCount = await _db.SaasSystems.CountAsync(),
+            modulesCount = await _db.SaasModules.CountAsync(),
+            subModulesCount = await _db.SaasSubModules.CountAsync(),
             tenantsCount = await _db.Tenants.CountAsync()
         });
     }

@@ -6,11 +6,11 @@ using Backend.Domain.Common.Interfaces;
 using Backend.Domain.CRM.Entities;
 using Backend.Domain.ERP.Entities;
 using Backend.Domain.HR.Entities;
+using Backend.Domain.Saas.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Reflection;
-using Module = Backend.Domain.Common.Module;
 
 public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
@@ -23,10 +23,24 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     }
 
     public DbSet<Tenant> Tenants => Set<Tenant>();
-    public DbSet<Module> Modules => Set<Module>();
-    public DbSet<TenantModule> TenantModules => Set<TenantModule>();
     public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<SaasSystem> SaasSystems => Set<SaasSystem>();
+    public DbSet<SaasModule> SaasModules => Set<SaasModule>();
+    public DbSet<SaasSubModule> SaasSubModules => Set<SaasSubModule>();
+    public DbSet<SaasPlan> SaasPlans => Set<SaasPlan>();
+    public DbSet<PlanSystem> PlanSystems => Set<PlanSystem>();
+    public DbSet<PlanModule> PlanModules => Set<PlanModule>();
+    public DbSet<PlanSubModule> PlanSubModules => Set<PlanSubModule>();
+    public DbSet<TenantSubscription> TenantSubscriptions => Set<TenantSubscription>();
+    public DbSet<TenantSystemLicense> TenantSystemLicenses => Set<TenantSystemLicense>();
+    public DbSet<TenantModuleLicense> TenantModuleLicenses => Set<TenantModuleLicense>();
+    public DbSet<TenantSubModuleLicense> TenantSubModuleLicenses => Set<TenantSubModuleLicense>();
+    public DbSet<TenantCompanyProfile> TenantCompanyProfiles => Set<TenantCompanyProfile>();
+    public DbSet<TenantBranch> TenantBranches => Set<TenantBranch>();
+    public DbSet<TenantSunatCredential> TenantSunatCredentials => Set<TenantSunatCredential>();
+    public DbSet<TenantCertificate> TenantCertificates => Set<TenantCertificate>();
+    public DbSet<InvoiceSeries> InvoiceSeries => Set<InvoiceSeries>();
 
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Category> Categories => Set<Category>();

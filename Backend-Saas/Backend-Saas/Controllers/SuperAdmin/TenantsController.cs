@@ -11,13 +11,11 @@ namespace Backend_Saas.Controllers.SuperAdmin;
 public class TenantsController : ControllerBase
 {
     private readonly ITenantService _tenantService;
-    private readonly ITenantModuleService _tenantModuleService;
     private readonly ITenantUserService _tenantUserService;
 
-    public TenantsController(ITenantService tenantService, ITenantModuleService tenantModuleService, ITenantUserService tenantUserService)
+    public TenantsController(ITenantService tenantService, ITenantUserService tenantUserService)
     {
         _tenantService = tenantService;
-        _tenantModuleService = tenantModuleService;
         _tenantUserService = tenantUserService;
     }
 
@@ -75,28 +73,6 @@ public class TenantsController : ControllerBase
         return Ok(new { message = "Tenant desactivado correctamente" });
     }
 
-    [HttpPost("{tenantId:guid}/modules")]
-    public async Task<IActionResult> AssignModule(Guid tenantId, [FromBody] AssignModuleRequest request)
-    {
-        await _tenantModuleService.AssignModuleAsync(tenantId, request.ModuleId, request.Config);
-        return Ok(new { message = "Módulo asignado correctamente" });
-    }
-
-    [HttpDelete("{tenantId:guid}/modules/{moduleId:guid}")]
-    public async Task<IActionResult> RemoveModule(Guid tenantId, Guid moduleId)
-    {
-        await _tenantModuleService.RemoveModuleFromTenantAsync(tenantId, moduleId);
-        return Ok(new { message = "Módulo removido correctamente" });
-    }
-
-    [HttpGet("{tenantId:guid}/modules")]
-    public async Task<IActionResult> GetModules(Guid tenantId)
-    {
-        var modules = await _tenantModuleService.GetTenantModulesAsync(tenantId);
-        var response = modules.Select(tm => new TenantModuleResponse(tm.ModuleId, tm.Module.Name, tm.Module.Key, tm.IsEnabled, tm.EnabledAt, tm.ExpiresAt));
-        return Ok(response);
-    }
-
     [HttpPost("{tenantId:guid}/users")]
     public async Task<IActionResult> CreateUser(Guid tenantId, [FromBody] CreateTenantUserRequest request)
     {
@@ -117,15 +93,11 @@ public class TenantsController : ControllerBase
     {
         var user = await _tenantUserService.CreateTenantUserAsync(tenantId, request.Email, request.Password, request.FirstName, request.LastName);
 
-        if (request.ModuleIds?.Any() == true)
+        return Ok(new
         {
-            foreach (var moduleId in request.ModuleIds)
-            {
-                await _tenantModuleService.AssignModuleAsync(tenantId, moduleId, null);
-            }
-        }
-
-        return Ok(new { message = "Tenant aprovisionado", userId = user.Id });
+            message = "Tenant aprovisionado. Asigna un plan desde /api/superadmin/tenants/{tenantId}/subscriptions/assign-plan para habilitar sistemas, módulos y submódulos.",
+            userId = user.Id
+        });
     }
 
     private static TenantResponse MapResponse(Backend.Domain.Common.Tenant t) => new(
