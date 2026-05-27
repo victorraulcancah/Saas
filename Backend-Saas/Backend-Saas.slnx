@@ -1,6 +1,7 @@
 <Solution>
-  <Project Path="Backend-Saas/Backend-Saas.csproj" />
+  <Project Path="Backend-Saas/Backend-Api.csproj" />
   <Project Path="Backend.Application/Backend.Application.csproj" />
   <Project Path="Backend.Domain/Backend.Domain.csproj" />
   <Project Path="Backend.Infrastructure/Backend.Infrastructure.csproj" />
+  <Project Path="Backend.SharedKernel/Backend.SharedKernel.csproj" Id="1f0220b9-ab51-4775-810d-859384912644" />
 </Solution>

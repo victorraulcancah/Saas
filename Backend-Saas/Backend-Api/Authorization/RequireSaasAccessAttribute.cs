@@ -2,7 +2,7 @@ using Backend.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Backend_Saas.Authorization;
+namespace Backend_Api.Authorization;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class RequireSaasAccessAttribute : TypeFilterAttribute
