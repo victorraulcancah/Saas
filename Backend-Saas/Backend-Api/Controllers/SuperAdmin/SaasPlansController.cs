@@ -1,40 +1,40 @@
-using Backend.Application.Common.Interfaces;
+﻿using Backend.Application.Common.Interfaces;
 using Backend.Domain.Saas.Entities;
-using Backend_Saas.DTOs.SaasCatalog;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend_Saas.Controllers.SuperAdmin;
-
-[ApiController]
-[Route("api/superadmin/saas-plans")]
-[Authorize(Roles = "SuperAdmin")]
-public class SaasPlansController : ControllerBase
+namespace Backend_Api
 {
-    private readonly ISaasSubscriptionService _subscriptionService;
-
-    public SaasPlansController(ISaasSubscriptionService subscriptionService)
+    [ApiController]
+    [Route("api/superadmin/saas-plans")]
+    [Authorize(Roles = "SuperAdmin")]
+    public class SaasPlansController : ControllerBase
     {
-        _subscriptionService = subscriptionService;
-    }
+        private readonly ISaasSubscriptionService _subscriptionService;
 
-    [HttpGet]
-    public async Task<IActionResult> GetPlans()
-    {
-        var plans = await _subscriptionService.GetPlansAsync();
-        return Ok(plans.Select(MapPlan));
-    }
+        public SaasPlansController(ISaasSubscriptionService subscriptionService)
+        {
+            _subscriptionService = subscriptionService;
+        }
 
-    private static SaasPlanResponse MapPlan(SaasPlan plan) => new(
-        plan.Id,
-        plan.Name,
-        plan.Key,
-        plan.Description,
-        plan.Price,
-        plan.Currency,
-        plan.BillingCycle,
-        plan.MaxUsers,
-        plan.MaxBranches,
-        plan.MaxDocumentsPerMonth
-    );
+        [HttpGet]
+        public async Task<IActionResult> GetPlans()
+        {
+            var plans = await _subscriptionService.GetPlansAsync();
+            return Ok(plans.Select(MapPlan));
+        }
+
+        private static DTOs.SaasCatalog.SaasPlanResponse MapPlan(SaasPlan plan) => new(
+            plan.Id,
+            plan.Name,
+            plan.Key,
+            plan.Description,
+            plan.Price,
+            plan.Currency,
+            plan.BillingCycle,
+            plan.MaxUsers,
+            plan.MaxBranches,
+            plan.MaxDocumentsPerMonth
+        );
+    }
 }

@@ -1,35 +1,34 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Backend_Saas.Hubs;
-
-[Authorize]
-public class NotificationHub : Hub
+namespace Backend_Api
 {
-    public override async Task OnConnectedAsync()
+    [Authorize]
+    public class NotificationHub : Hub
     {
-        var tenantId = Context.User?.FindFirst("TenantId")?.Value;
-        if (tenantId is not null)
+        public override async Task OnConnectedAsync()
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"tenant_{tenantId}");
+            var tenantId = Context.User?.FindFirst("TenantId")?.Value;
+            if (tenantId is not null)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"tenant_{tenantId}");
+            }
+            await base.OnConnectedAsync();
         }
 
-        await base.OnConnectedAsync();
-    }
-
-    public override async Task OnDisconnectedAsync(Exception? exception)
-    {
-        var tenantId = Context.User?.FindFirst("TenantId")?.Value;
-        if (tenantId is not null)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"tenant_{tenantId}");
+            var tenantId = Context.User?.FindFirst("TenantId")?.Value;
+            if (tenantId is not null)
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"tenant_{tenantId}");
+            }
+            await base.OnDisconnectedAsync(exception);
         }
 
-        await base.OnDisconnectedAsync(exception);
-    }
-
-    public async Task SendMessage(string user, string message)
-    {
-        await Clients.All.SendAsync("ReceiveMessage", user, message);
+        public async Task SendMessage(string user, string message)
+        {
+            await Clients.All.SendAsync("ReceiveMessage", user, message);
+        }
     }
 }

@@ -1,47 +1,47 @@
-using Backend.Application.ERP.Models;
+﻿using Backend.Application.ERP.Models;
 using Backend.Application.ERP.Services;
-using Backend_Saas.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend_Saas.Controllers.ERP;
-
-[ApiController]
-[Route("api/erp/warehouse-transfers")]
-[Authorize]
-[RequireSaasAccess("erp", "inventario", "almacenes")]
-public class WarehouseTransfersController : ControllerBase
+namespace Backend_Api
 {
-    private readonly IErpInventoryService _inventory;
-
-    public WarehouseTransfersController(IErpInventoryService inventory)
+    [ApiController]
+    [Route("api/erp/warehouse-transfers")]
+    [Authorize]
+    [RequireSaasAccess("erp", "inventario", "almacenes")]
+    public class WarehouseTransfersController : ControllerBase
     {
-        _inventory = inventory;
-    }
+        private readonly IErpInventoryService _inventory;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        return Ok(await _inventory.GetWarehouseTransfersAsync());
-    }
+        public WarehouseTransfersController(IErpInventoryService inventory)
+        {
+            _inventory = inventory;
+        }
 
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] WarehouseTransferRequest request)
-    {
-        return Ok(await _inventory.CreateWarehouseTransferAsync(request));
-    }
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            return Ok(await _inventory.GetWarehouseTransfersAsync());
+        }
 
-    [HttpPost("{id:guid}/send")]
-    public async Task<IActionResult> Send(Guid id)
-    {
-        var transfer = await _inventory.SendWarehouseTransferAsync(id);
-        return transfer is null ? NotFound() : Ok(transfer);
-    }
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] WarehouseTransferRequest request)
+        {
+            return Ok(await _inventory.CreateWarehouseTransferAsync(request));
+        }
 
-    [HttpPost("{id:guid}/receive")]
-    public async Task<IActionResult> Receive(Guid id)
-    {
-        var transfer = await _inventory.ReceiveWarehouseTransferAsync(id);
-        return transfer is null ? NotFound() : Ok(transfer);
+        [HttpPost("{id:guid}/send")]
+        public async Task<IActionResult> Send(Guid id)
+        {
+            var transfer = await _inventory.SendWarehouseTransferAsync(id);
+            return transfer is null ? NotFound() : Ok(transfer);
+        }
+
+        [HttpPost("{id:guid}/receive")]
+        public async Task<IActionResult> Receive(Guid id)
+        {
+            var transfer = await _inventory.ReceiveWarehouseTransferAsync(id);
+            return transfer is null ? NotFound() : Ok(transfer);
+        }
     }
 }

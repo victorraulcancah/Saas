@@ -1,3 +1,4 @@
-namespace Backend_Saas.DTOs.Auth;
-
-public record LoginRequest(string Email, string Password);
+﻿namespace Backend_Api.DTOs.Auth
+{
+    public record LoginRequest(string Email, string Password);
+}

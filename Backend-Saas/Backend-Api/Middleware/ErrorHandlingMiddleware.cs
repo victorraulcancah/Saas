@@ -1,46 +1,47 @@
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 
-namespace Backend_Saas.Middleware;
-
-public class ErrorHandlingMiddleware
+namespace Backend_Api.Middleware
 {
-    private readonly RequestDelegate _next;
-
-    public ErrorHandlingMiddleware(RequestDelegate next)
+    public class ErrorHandlingMiddleware
     {
-        _next = next;
-    }
+        private readonly RequestDelegate _next;
 
-    public async Task InvokeAsync(HttpContext context)
-    {
-        try
+        public ErrorHandlingMiddleware(RequestDelegate next)
         {
-            await _next(context);
+            _next = next;
         }
-        catch (UnauthorizedAccessException ex)
+
+        public async Task InvokeAsync(HttpContext context)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = ex.Message }));
-        }
-        catch (KeyNotFoundException ex)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = ex.Message }));
-        }
-        catch (InvalidOperationException ex)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = ex.Message }));
-        }
-        catch (Exception)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = "Error interno del servidor" }));
+            try
+            {
+                await _next(context);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = ex.Message }));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = ex.Message }));
+            }
+            catch (InvalidOperationException ex)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = ex.Message }));
+            }
+            catch (Exception)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = "Error interno del servidor" }));
+            }
         }
     }
 }

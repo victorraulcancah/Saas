@@ -1,25 +1,25 @@
-namespace Backend_Saas.Middleware;
-
-public class TenantMiddleware
+﻿namespace Backend_Api.Middleware
 {
-    private readonly RequestDelegate _next;
-
-    public TenantMiddleware(RequestDelegate next)
+    public class TenantMiddleware
     {
-        _next = next;
-    }
+        private readonly RequestDelegate _next;
 
-    public async Task InvokeAsync(HttpContext context)
-    {
-        if (context.User.Identity?.IsAuthenticated == true)
+        public TenantMiddleware(RequestDelegate next)
         {
-            var tenantIdClaim = context.User.FindFirst("TenantId")?.Value;
-            if (tenantIdClaim is not null)
-            {
-                context.Items["TenantId"] = Guid.Parse(tenantIdClaim);
-            }
+            _next = next;
         }
 
-        await _next(context);
+        public async Task InvokeAsync(HttpContext context)
+        {
+            if (context.User.Identity?.IsAuthenticated == true)
+            {
+                var tenantIdClaim = context.User.FindFirst("TenantId")?.Value;
+                if (tenantIdClaim is not null)
+                {
+                    context.Items["TenantId"] = Guid.Parse(tenantIdClaim);
+                }
+            }
+            await _next(context);
+        }
     }
 }

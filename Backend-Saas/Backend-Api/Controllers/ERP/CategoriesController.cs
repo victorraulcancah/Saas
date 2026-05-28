@@ -1,33 +1,33 @@
-using Backend.Application.ERP.Models;
+﻿using Backend.Application.ERP.Models;
 using Backend.Application.ERP.Services;
-using Backend_Saas.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend_Saas.Controllers.ERP;
-
-[ApiController]
-[Route("api/erp/categories")]
-[Authorize]
-[RequireSaasAccess("erp", "inventario", "productos")]
-public class CategoriesController : ControllerBase
+namespace Backend_Api
 {
-    private readonly IErpCatalogService _catalog;
-
-    public CategoriesController(IErpCatalogService catalog)
+    [ApiController]
+    [Route("api/erp/categories")]
+    [Authorize]
+    [RequireSaasAccess("erp", "inventario", "productos")]
+    public class CategoriesController : ControllerBase
     {
-        _catalog = catalog;
-    }
+        private readonly IErpCatalogService _catalog;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        return Ok(await _catalog.GetCategoriesAsync());
-    }
+        public CategoriesController(IErpCatalogService catalog)
+        {
+            _catalog = catalog;
+        }
 
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CategoryRequest request)
-    {
-        return Ok(await _catalog.CreateCategoryAsync(request));
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            return Ok(await _catalog.GetCategoriesAsync());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CategoryRequest request)
+        {
+            return Ok(await _catalog.CreateCategoryAsync(request));
+        }
     }
 }

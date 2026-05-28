@@ -1,33 +1,33 @@
-using Backend.Application.ERP.Models;
+﻿using Backend.Application.ERP.Models;
 using Backend.Application.ERP.Services;
-using Backend_Saas.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend_Saas.Controllers.ERP;
-
-[ApiController]
-[Route("api/erp/warehouse-locations")]
-[Authorize]
-[RequireSaasAccess("erp", "inventario", "almacenes")]
-public class WarehouseLocationsController : ControllerBase
+namespace Backend_Api
 {
-    private readonly IErpCatalogService _catalog;
-
-    public WarehouseLocationsController(IErpCatalogService catalog)
+    [ApiController]
+    [Route("api/erp/warehouse-locations")]
+    [Authorize]
+    [RequireSaasAccess("erp", "inventario", "almacenes")]
+    public class WarehouseLocationsController : ControllerBase
     {
-        _catalog = catalog;
-    }
+        private readonly IErpCatalogService _catalog;
 
-    [HttpGet("warehouse/{warehouseId:guid}")]
-    public async Task<IActionResult> GetByWarehouse(Guid warehouseId)
-    {
-        return Ok(await _catalog.GetWarehouseLocationsAsync(warehouseId));
-    }
+        public WarehouseLocationsController(IErpCatalogService catalog)
+        {
+            _catalog = catalog;
+        }
 
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] WarehouseLocationRequest request)
-    {
-        return Ok(await _catalog.CreateWarehouseLocationAsync(request));
+        [HttpGet("warehouse/{warehouseId:guid}")]
+        public async Task<IActionResult> GetByWarehouse(Guid warehouseId)
+        {
+            return Ok(await _catalog.GetWarehouseLocationsAsync(warehouseId));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] WarehouseLocationRequest request)
+        {
+            return Ok(await _catalog.CreateWarehouseLocationAsync(request));
+        }
     }
 }

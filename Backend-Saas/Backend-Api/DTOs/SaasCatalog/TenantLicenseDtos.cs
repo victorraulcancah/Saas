@@ -1,3 +1,4 @@
-namespace Backend_Saas.DTOs.SaasCatalog;
-
-public record EnableTenantLicenseRequest(string? Source, DateTime? ExpiresAt);
+﻿namespace Backend_Api.DTOs.SaasCatalog
+{
+    public record EnableTenantLicenseRequest(string? Source, DateTime? ExpiresAt);
+}

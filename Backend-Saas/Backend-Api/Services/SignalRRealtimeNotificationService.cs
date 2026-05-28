@@ -1,20 +1,20 @@
-using Backend.Application.Common.Interfaces;
-using Backend_Saas.Hubs;
+﻿using Backend.Application.Common.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Backend_Saas.Services;
-
-public class SignalRRealtimeNotificationService : IRealtimeNotificationService
+namespace Backend_Api
 {
-    private readonly IHubContext<NotificationHub> _hub;
-
-    public SignalRRealtimeNotificationService(IHubContext<NotificationHub> hub)
+    public class SignalRRealtimeNotificationService : IRealtimeNotificationService
     {
-        _hub = hub;
-    }
+        private readonly IHubContext<NotificationHub> _hub;
 
-    public Task NotifyTenantAsync(Guid tenantId, string eventName, object payload)
-    {
-        return _hub.Clients.Group($"tenant_{tenantId}").SendAsync(eventName, payload);
+        public SignalRRealtimeNotificationService(IHubContext<NotificationHub> hub)
+        {
+            _hub = hub;
+        }
+
+        public Task NotifyTenantAsync(Guid tenantId, string eventName, object payload)
+        {
+            return _hub.Clients.Group($"tenant_{tenantId}").SendAsync(eventName, payload);
+        }
     }
 }
