@@ -5,8 +5,7 @@ import {
   TeamOutlined, AppstoreOutlined, UserOutlined,
   MenuOutlined, LogoutOutlined,
   DashboardOutlined, SettingOutlined, BellOutlined,
-  FolderOutlined, SafetyOutlined, LockOutlined,
-  ShoppingOutlined, FileTextOutlined
+  SafetyOutlined, LockOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../lib/auth-context';
 
@@ -16,16 +15,10 @@ const menuItems = [
   { key: '/', icon: <DashboardOutlined />, label: 'Dashboard' },
   { type: 'divider' as const },
   { key: 'gestion', label: 'Gestión', type: 'group' as const, children: [
-    { key: '/tenants', icon: <TeamOutlined />, label: 'Tenants' },
+    { key: '/tenants', icon: <TeamOutlined />, label: 'Empresas' },
     { key: '/catalog', icon: <AppstoreOutlined />, label: 'Catálogo SaaS' },
     { key: '/plans', icon: <SafetyOutlined />, label: 'Planes' },
     { key: '/licenses', icon: <LockOutlined />, label: 'Licencias' },
-  ]},
-  { type: 'divider' as const },
-  { key: 'erp', label: 'ERP', type: 'group' as const, children: [
-    { key: '/categories', icon: <FolderOutlined />, label: 'Categorías' },
-    { key: '/products', icon: <ShoppingOutlined />, label: 'Productos' },
-    { key: '/invoices', icon: <FileTextOutlined />, label: 'Facturas' },
   ]},
   { type: 'divider' as const },
   { key: 'sistema', label: 'Sistema', type: 'group' as const, children: [
@@ -36,7 +29,7 @@ const menuItems = [
 
 const CLAMP = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
-export default function Dashboard() {
+export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
   const [pos, setPos] = useState({ x: 12, y: 12 });
   const { logout, email } = useAuth();
@@ -181,7 +174,6 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg-body)' }}>
-      {/* Desktop draggable sidebar */}
       {!isMobile && collapsed && (
         <div
           onClick={() => setCollapsed(false)}
@@ -231,7 +223,6 @@ export default function Dashboard() {
         </aside>
       )}
 
-      {/* Mobile drawer */}
       {isMobile && (
         <Drawer
           placement="left"
