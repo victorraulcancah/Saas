@@ -1,4 +1,4 @@
-namespace Backend.Infrastructure.Persistence.PostgreSQL.Configurations;
+namespace Backend.Infrastructure.Persistence.PostgreSQL.Configurations.CRM;
 
 using Backend.Domain.CRM.Entities;
 using Microsoft.EntityFrameworkCore;

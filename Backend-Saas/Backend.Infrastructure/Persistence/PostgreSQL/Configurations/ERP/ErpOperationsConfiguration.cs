@@ -1,4 +1,4 @@
-namespace Backend.Infrastructure.Persistence.PostgreSQL.Configurations;
+namespace Backend.Infrastructure.Persistence.PostgreSQL.Configurations.ERP;
 
 using Backend.Domain.ERP.Entities;
 using Microsoft.EntityFrameworkCore;

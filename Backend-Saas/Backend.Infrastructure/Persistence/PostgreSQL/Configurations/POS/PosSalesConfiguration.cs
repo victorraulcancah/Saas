@@ -1,4 +1,4 @@
-namespace Backend.Infrastructure.Persistence.PostgreSQL.Configurations;
+namespace Backend.Infrastructure.Persistence.PostgreSQL.Configurations.POS;
 
 using Backend.Domain.POS.Entities;
 using Microsoft.EntityFrameworkCore;

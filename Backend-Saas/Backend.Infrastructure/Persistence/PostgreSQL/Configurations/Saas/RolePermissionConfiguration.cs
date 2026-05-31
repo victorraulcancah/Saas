@@ -2,7 +2,7 @@ using Backend.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Backend.Infrastructure.Persistence.PostgreSQL.Configurations;
+namespace Backend.Infrastructure.Persistence.PostgreSQL.Configurations.Saas;
 
 public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermission>
 {

@@ -22,3 +22,7 @@
 # OS
 .DS_Store
 Thumbs.db
+
+# Entity Framework Migrations (generated on-demand)
+**/Migrations/
+!**/Migrations/.gitkeep
