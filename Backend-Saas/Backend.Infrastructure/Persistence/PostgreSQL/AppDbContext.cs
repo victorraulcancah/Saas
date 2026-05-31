@@ -1,12 +1,21 @@
 namespace Backend.Infrastructure.Persistence.PostgreSQL;
 
 using Backend.Application.Common.Interfaces;
+using Backend.Domain.BI.Entities;
 using Backend.Domain.Common;
 using Backend.Domain.CRM.Entities;
 using Backend.Domain.ERP.Entities;
+using Backend.Domain.HelpDesk.Entities;
 using Backend.Domain.HR.Entities;
+using Backend.Domain.LossPrevention.Entities;
+using Backend.Domain.OMS.Entities;
+using Backend.Domain.PIM.Entities;
 using Backend.Domain.POS.Entities;
+using Backend.Domain.RetailAnalytics.Entities;
 using Backend.Domain.Saas.Entities;
+using Backend.Domain.SFA.Entities;
+using Backend.Domain.TMS.Entities;
+using Backend.Domain.WMS.Entities;
 using Backend.SharedKernel.Common.Interfaces;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +73,19 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Attendance> Attendances => Set<Attendance>();
     public DbSet<Payroll> Payrolls => Set<Payroll>();
+
+    public DbSet<OmnichannelOrder> OmnichannelOrders => Set<OmnichannelOrder>();
+    public DbSet<OmnichannelOrderItem> OmnichannelOrderItems => Set<OmnichannelOrderItem>();
+    public DbSet<FulfillmentAssignment> FulfillmentAssignments => Set<FulfillmentAssignment>();
+
+    public DbSet<WarehouseTask> WarehouseTasks => Set<WarehouseTask>();
+    public DbSet<DeliveryRoute> DeliveryRoutes => Set<DeliveryRoute>();
+    public DbSet<ProductContent> ProductContents => Set<ProductContent>();
+    public DbSet<FieldOrder> FieldOrders => Set<FieldOrder>();
+    public DbSet<HelpDeskTicket> HelpDeskTickets => Set<HelpDeskTicket>();
+    public DbSet<StoreTrafficReading> StoreTrafficReadings => Set<StoreTrafficReading>();
+    public DbSet<CycleCount> CycleCounts => Set<CycleCount>();
+    public DbSet<MetricSnapshot> MetricSnapshots => Set<MetricSnapshot>();
 
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Opportunity> Opportunities => Set<Opportunity>();

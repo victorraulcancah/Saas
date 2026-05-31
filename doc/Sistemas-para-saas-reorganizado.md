@@ -410,9 +410,9 @@
 - Roles globales, permisos, auditoría y límites de uso
 
 **Fase 1 (MVP):**
-- Sistema 1: ERP ✅
-- Sistema 2: POS ✅
-- Sistema 3: CRM ✅
+- Sistema 1: ERP 
+- Sistema 2: POS 
+- Sistema 3: CRM 
 
 **Fase 2 (Operaciones):**
 - Sistema 4: RH

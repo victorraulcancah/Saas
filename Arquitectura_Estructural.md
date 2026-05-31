@@ -302,3 +302,491 @@ Ejemplo: `POST /api/pos/sales` — crear una venta
 - [ ] Los servicios retornan DTOs, nunca entidades de dominio
 - [ ] La lógica de negocio está en Domain o Application, no en Infrastructure ni Api
 - [ ] El controller no tiene `if`s de negocio — solo llama al servicio y retorna
+
+---
+
+## 🧭 Estado actual de construcción
+
+Esta sección aterriza la arquitectura contra el avance real de la solución `Backend-Saas`.
+
+### Proyectos reales en disco
+
+```
+Backend-Saas/
+├── Backend.SharedKernel
+├── Backend.Domain
+├── Backend.Application
+├── Backend.Infrastructure
+└── Backend-Api
+```
+
+> Nota: en el documento se habla de `Backend.Api` como capa conceptual. En disco el proyecto se llama `Backend-Api`.
+
+### Infraestructura base ya armada
+
+| Componente | Estado | Observación |
+|---|---:|---|
+| PostgreSQL / EF Core | En construcción | `AppDbContext` ya concentra SaaS, ERP, POS, CRM y HR. |
+| Identity / JWT | En construcción | Roles base: `SuperAdmin`, `AdminTenant`, `Usuario`. |
+| Multi-tenant | En construcción | Filtros por `TenantId` e `IsDeleted` aplicados desde `AppDbContext`. |
+| Catálogo SaaS | En construcción | Ya existen sistemas, módulos, submódulos, planes y licencias. |
+| Control de acceso SaaS | En construcción | `ISaasAccessService` valida tenant, suscripción, sistema, módulo y submódulo. |
+| Redis | Base creada | Cache para snapshot de licencias por tenant. |
+| MongoDB | Base creada | Auditoría/logs mediante `MongoAuditService`. |
+| SignalR | Base creada | Canal `/hubs/notifications` para eventos en tiempo real. |
+| Swagger/OpenAPI | Base creada | Disponible en ambiente de desarrollo. |
+
+### Sistemas con implementación inicial
+
+| Sistema | Domain | Application | Infrastructure | Api |
+|---|---:|---:|---:|---:|
+| 0. Plataforma SaaS Central | Sí | Sí | Sí | Sí |
+| 1. ERP | Sí | Sí | Sí | Sí |
+| 2. POS | Sí | Sí | Sí | Sí |
+| 3. CRM | Sí | Sí | Sí | Parcial |
+| 4. RH / HR | Sí | Parcial | Parcial | Pendiente |
+| 5. OMS | Pendiente | Pendiente | Pendiente | Pendiente |
+| 6. WMS | Pendiente | Pendiente | Pendiente | Pendiente |
+| 7. TMS | Carpeta base | Pendiente | Pendiente | Pendiente |
+| 8. PIM | Pendiente | Pendiente | Pendiente | Pendiente |
+| 9. SFA | Pendiente | Pendiente | Pendiente | Pendiente |
+| 10. Help Desk | Incluido parcialmente en CRM | Parcial | Parcial | Pendiente |
+| 11. Retail Analytics | Pendiente | Pendiente | Pendiente | Pendiente |
+| 12. Prevención de Pérdidas | Pendiente | Pendiente | Pendiente | Pendiente |
+| 13. BI | Pendiente | Pendiente | Pendiente | Pendiente |
+
+---
+
+## 🧩 Mapa estructural por los 14 sistemas
+
+El archivo `doc/Sistemas-para-saas-reorganizado.md` define el mapa funcional. Esta arquitectura lo convierte en estructura de backend.
+
+### Regla de carpetas por sistema
+
+Cada sistema debe tener la misma forma en las capas principales:
+
+```
+Backend.Domain/
+└── SistemaX/
+    ├── Entities/
+    ├── Events/
+    ├── ValueObjects/
+    └── Exceptions/
+
+Backend.Application/
+└── SistemaX/
+    ├── Models/
+    ├── Services/
+    ├── Commands/
+    └── Queries/
+
+Backend.Infrastructure/
+├── Services/
+└── Persistence/PostgreSQL/
+    ├── Configurations/
+    └── Repositories/
+
+Backend-Api/
+└── Controllers/
+    └── SistemaX/
+```
+
+### Convención de nombres
+
+| Pieza | Convención | Ejemplo |
+|---|---|---|
+| Entidad de dominio | Nombre de negocio singular | `Product`, `PosSale`, `TenantSubscription` |
+| Servicio de Application | `I{Sistema}{Proceso}Service` | `IErpInventoryService` |
+| Implementación | `{Sistema}{Proceso}Service` | `ErpInventoryService` |
+| Controller | `{Recurso}Controller` | `ProductsController` |
+| Modelo de entrada | `{Accion}{Recurso}Request` | `CreateTenantRequest` |
+| Modelo de salida | `{Recurso}Response` | `TenantResponse` |
+| Permiso | `{system}.{module}.{submodule}.{action}` | `erp.inventory.products.read` |
+
+---
+
+## 🏛️ Sistema 0 — Plataforma SaaS Central
+
+**Objetivo técnico:** controlar quién puede usar cada sistema, módulo y submódulo.
+
+### Entidades base
+
+| Entidad | Responsabilidad |
+|---|---|
+| `Tenant` | Cliente SaaS dueño de sus datos, usuarios y sucursales. |
+| `SaasSystem` | Sistema comercial vendible: ERP, POS, CRM, etc. |
+| `SaasModule` | Módulo vendible dentro de un sistema. |
+| `SaasSubModule` | Funcionalidad granular activable por plan o add-on. |
+| `SaasPlan` | Plan comercial: Starter, Professional, Enterprise o personalizado. |
+| `TenantSubscription` | Suscripción activa, trial, vencida, suspendida o cancelada. |
+| `TenantSystemLicense` | Habilita/deshabilita un sistema completo para un tenant. |
+| `TenantModuleLicense` | Habilita/deshabilita un módulo específico. |
+| `TenantSubModuleLicense` | Habilita/deshabilita una función granular. |
+| `TenantCompanyProfile` | Datos fiscales y comerciales de la empresa. |
+| `TenantBranch` | Sucursales del tenant. |
+| `TenantSunatCredential` | Credenciales tributarias por tenant. |
+| `InvoiceSeries` | Series de facturación por empresa/sucursal. |
+
+### Flujo obligatorio antes de ejecutar cualquier módulo
+
+```
+1. JWT identifica usuario y tenant.
+2. TenantMiddleware resuelve TenantId.
+3. Authorization valida rol/permisos.
+4. ISaasAccessService valida:
+   - tenant activo
+   - suscripción activa
+   - sistema habilitado
+   - módulo habilitado
+   - submódulo habilitado, si aplica
+5. Application ejecuta el caso de uso.
+```
+
+### Construcción pendiente recomendada
+
+- Consolidar atributos de autorización por sistema/módulo/submódulo.
+- Invalidar cache de licencias cuando cambie una suscripción o un add-on.
+- Registrar auditoría por cambios de plan, licencias, usuarios y permisos.
+- Agregar límites de uso por plan: usuarios, sucursales, documentos, API calls y almacenamiento.
+
+---
+
+## 📦 Sistema 1 — ERP
+
+**Objetivo técnico:** núcleo financiero, compras, facturación e inventario central.
+
+### Subdominios ERP
+
+| Subdominio | Entidades principales | Servicios esperados |
+|---|---|---|
+| Catálogo | `Product`, `Category`, `Supplier` | `IErpCatalogService` |
+| Inventario | `Warehouse`, `WarehouseLocation`, `ProductStock`, `InventoryMovement` | `IErpInventoryService` |
+| Compras | `PurchaseOrder`, `PurchaseOrderItem`, `GoodsReceipt` | `IErpPurchasingService` |
+| Transferencias | `WarehouseTransfer`, `WarehouseTransferItem`, `DispatchGuide` | `IErpInventoryService` |
+| Facturación | `Invoice`, `InvoiceSeries` | `IErpBillingService` |
+
+### Reglas críticas
+
+- Todo movimiento de stock debe generar `InventoryMovement`.
+- Ninguna venta, compra, transferencia o ajuste debe modificar stock sin registrar origen.
+- Facturación debe validar serie activa, datos fiscales del tenant y correlativo.
+- Los productos pertenecen al tenant, pero pueden exponerse a POS, OMS, PIM, WMS y BI.
+
+### Construcción pendiente recomendada
+
+- Separar comandos transaccionales: compra, recepción, transferencia, ajuste y facturación.
+- Agregar eventos de dominio: `StockChanged`, `StockLow`, `InvoiceIssued`, `GoodsReceived`.
+- Crear endpoints de consulta optimizados para stock por almacén/sucursal.
+- Preparar integración tributaria real para SUNAT como servicio externo desacoplado.
+
+---
+
+## 🛍️ Sistema 2 — POS
+
+**Objetivo técnico:** ventas de tienda física, caja, pagos y stock local.
+
+### Entidades base
+
+| Entidad | Responsabilidad |
+|---|---|
+| `PosSale` | Venta realizada en caja. |
+| `PosSaleItem` | Ítems vendidos, cantidades, precios y descuentos. |
+| `CashRegister` *(pendiente)* | Caja, apertura, cierre y arqueo. |
+| `Payment` *(pendiente)* | Medios de pago: efectivo, tarjeta, Yape/Plin, mixto. |
+
+### Integraciones obligatorias
+
+- Consulta productos y precios desde ERP/PIM.
+- Descuenta stock vía ERP Inventario.
+- Emite comprobante vía ERP Facturación.
+- Notifica ventas en tiempo real vía SignalR.
+- Expone datos a BI y Retail Analytics.
+
+### Construcción pendiente recomendada
+
+- Implementar caja: apertura, cierre, arqueo, diferencias y responsable.
+- Implementar pagos múltiples por venta.
+- Agregar anulaciones/devoluciones con auditoría.
+- Soportar operación offline con sincronización controlada.
+
+---
+
+## 🎯 Sistema 3 — CRM
+
+**Objetivo técnico:** clientes, oportunidades, cotizaciones, pedidos comerciales y postventa.
+
+### Entidades base
+
+| Entidad | Responsabilidad |
+|---|---|
+| `Customer` | Cliente final o corporativo. |
+| `Opportunity` | Oportunidad comercial en pipeline. |
+| `SalesOrder` | Pedido comercial antes de despacho/facturación. |
+| `SalesOrderItem` | Detalle del pedido. |
+| `SupportTicket` | Ticket de atención o reclamo. |
+
+### Construcción pendiente recomendada
+
+- Agregar controllers para CRM si aún no están expuestos.
+- Separar Help Desk como Sistema 10 si el volumen crece.
+- Conectar `SalesOrder` con OMS para orquestar pedidos omnicanal.
+- Agregar trazabilidad de campañas y origen del cliente.
+
+---
+
+## 👥 Sistema 4 — RH / HR
+
+**Objetivo técnico:** empleados, asistencia, turnos, nómina y comisiones.
+
+### Entidades base
+
+| Entidad | Responsabilidad |
+|---|---|
+| `Employee` | Trabajador del tenant. |
+| `Attendance` | Marcaciones, faltas y tardanzas. |
+| `Payroll` | Nómina, descuentos, horas extra y comisiones. |
+
+### Construcción pendiente recomendada
+
+- Crear interfaces en Application para empleados, asistencia y nómina.
+- Implementar servicios de Infrastructure y controllers.
+- Conectar comisiones con ventas POS.
+- Agregar calendario laboral, turnos y reglas por país.
+
+---
+
+## 🚚 Sistemas logísticos pendientes: OMS, WMS y TMS
+
+Estos sistemas deben construirse después de estabilizar ERP/POS porque dependen de inventario, pedidos y sucursales.
+
+### Sistema 5 — OMS
+
+| Módulo | Entidades sugeridas | Responsabilidad |
+|---|---|---|
+| Enrutamiento inteligente | `OmnichannelOrder`, `OrderRoute`, `FulfillmentAssignment` | Decide desde qué tienda/almacén atender. |
+| Consolidación de canales | `SalesChannel`, `ChannelOrder`, `ChannelSyncLog` | Integra web, WhatsApp y marketplaces. |
+
+### Sistema 6 — WMS
+
+| Módulo | Entidades sugeridas | Responsabilidad |
+|---|---|---|
+| Operaciones de almacén | `PickingTask`, `PackingTask`, `StorageBin`, `WarehouseZone` | Control operativo dentro del almacén. |
+| Distribución interna | `ReplenishmentOrder`, `InternalDispatch` | Reabastecimiento a sucursales. |
+
+### Sistema 7 — TMS
+
+| Módulo | Entidades sugeridas | Responsabilidad |
+|---|---|---|
+| Planificación de rutas | `Vehicle`, `RoutePlan`, `RouteStop` | Optimización por capacidad y distancia. |
+| Seguimiento y entrega | `Delivery`, `ProofOfDelivery`, `GpsTrackPoint` | Última milla y confirmación digital. |
+
+### Orden recomendado
+
+1. OMS: crear pedido omnicanal y asignación de fulfillment.
+2. WMS: crear picking/packing conectado a almacenes ERP.
+3. TMS: crear despacho, ruta, tracking y prueba de entrega.
+
+---
+
+## 🧾 Sistemas comerciales y catálogo: PIM y SFA
+
+### Sistema 8 — PIM
+
+**Objetivo técnico:** catálogo único de productos enriquecidos.
+
+| Entidad sugerida | Responsabilidad |
+|---|---|
+| `ProductContent` | Descripciones comerciales, atributos y SEO. |
+| `ProductMedia` | Fotos, videos y documentos. |
+| `ProductAttributeSet` | Plantillas de atributos por categoría. |
+| `ChannelPublication` | Publicación por POS, ecommerce, app o marketplace. |
+
+**Integración:** ERP conserva producto, costo y stock; PIM conserva contenido comercial y publicación.
+
+### Sistema 9 — SFA
+
+**Objetivo técnico:** venta en campo online/offline.
+
+| Entidad sugerida | Responsabilidad |
+|---|---|
+| `FieldVisit` | Visita a cliente en ruta. |
+| `RouteCustomer` | Cliente asignado a ruta comercial. |
+| `PreOrder` | Pedido tomado en campo antes de confirmación. |
+| `FieldCollection` | Cobranza registrada por vendedor. |
+
+**Integración:** CRM aporta clientes, ERP aporta stock/precios, OMS procesa pedidos confirmados.
+
+---
+
+## 🎧 Sistema 10 — Help Desk
+
+Actualmente existe `SupportTicket` dentro de CRM. Puede mantenerse ahí al inicio, pero debe separarse cuando soporte requiera SLA, colas, agentes y métricas propias.
+
+### Entidades sugeridas al separarlo
+
+| Entidad | Responsabilidad |
+|---|---|
+| `Ticket` | Caso de soporte o reclamo. |
+| `TicketMessage` | Conversación y notas internas. |
+| `TicketAssignment` | Agente, cola y prioridad. |
+| `SlaPolicy` | Tiempos comprometidos por plan o severidad. |
+
+### Construcción pendiente recomendada
+
+- Definir si Help Desk será módulo CRM o sistema independiente.
+- Agregar SLA por plan SaaS.
+- Conectar tickets internos del SaaS con tickets postventa de clientes finales.
+
+---
+
+## 📊 Sistemas analíticos: Retail Analytics, Prevención y BI
+
+Estos sistemas deben leer eventos y datos consolidados. No deben bloquear operaciones transaccionales.
+
+### Sistema 11 — Retail Analytics
+
+| Entidad sugerida | Responsabilidad |
+|---|---|
+| `StoreTrafficReading` | Conteo de personas por tienda/hora. |
+| `HeatmapReading` | Zonas calientes/frías de tienda. |
+| `ConversionMetric` | Visitas vs tickets POS. |
+
+### Sistema 12 — Prevención de Pérdidas
+
+| Entidad sugerida | Responsabilidad |
+|---|---|
+| `CycleCount` | Inventario cíclico por zona/categoría. |
+| `ShrinkageCase` | Caso de pérdida o descuadre. |
+| `SuspiciousTransactionAlert` | Alertas por anulaciones, devoluciones o ajustes atípicos. |
+
+### Sistema 13 — BI
+
+| Entidad sugerida | Responsabilidad |
+|---|---|
+| `ReportDefinition` | Definición de dashboard/reporte. |
+| `MetricSnapshot` | Métricas precalculadas por fecha/tenant. |
+| `DataExportJob` | Exportación programada. |
+
+### Construcción recomendada
+
+- Emitir eventos desde ERP, POS, CRM, OMS, WMS y TMS.
+- Guardar datos operativos en PostgreSQL.
+- Guardar logs/auditoría/eventos pesados en MongoDB.
+- Preparar proyecciones de lectura para dashboards.
+- Mantener BI como lectura agregada, sin modificar entidades transaccionales.
+
+---
+
+## 🔐 Seguridad, permisos y licencias
+
+### Niveles de control
+
+| Nivel | Qué controla | Ejemplo |
+|---|---|---|
+| Tenant | Si el cliente puede entrar | tenant activo/suspendido |
+| Suscripción | Si el contrato está vigente | trial, active, expired |
+| Sistema | Si aparece en el menú | `erp`, `pos`, `crm` |
+| Módulo | Si puede usar una sección | `erp.inventory` |
+| Submódulo | Si puede ejecutar una función | `erp.inventory.adjustments` |
+| Permiso | Acción exacta del usuario | `erp.inventory.adjustments.approve` |
+| Límite | Uso permitido por plan | 10 usuarios, 3 sucursales |
+
+### Política por endpoint
+
+Todo endpoint productivo debe declarar:
+
+```
+[Authorize]
+[RequireSaasAccess("erp", "inventory", "products")]
+[RequirePermission("erp.inventory.products.read")]
+```
+
+La validación de licencia responde si el tenant compró la función. La validación de permiso responde si el usuario puede ejecutar la acción.
+
+---
+
+## 🧱 Orden de construcción recomendado
+
+### Fase 1 — Cimiento SaaS y ERP/POS
+
+- Cerrar catálogo SaaS, planes, licencias, permisos y auditoría.
+- Completar ERP inventario, compras, facturación y stock.
+- Completar POS caja, pagos, anulaciones y cierre.
+- Asegurar que todo endpoint pase por licencia + permiso.
+
+### Fase 2 — CRM y RH
+
+- Exponer controllers CRM.
+- Completar clientes, oportunidades, pedidos comerciales y tickets.
+- Completar empleados, asistencia, turnos, nómina y comisiones.
+- Conectar comisiones RH con ventas POS.
+
+### Fase 3 — OMS/WMS/TMS
+
+- Crear pedidos omnicanal y asignación de fulfillment.
+- Crear picking/packing y reposición desde almacén.
+- Crear rutas, tracking y prueba de entrega.
+
+### Fase 4 — PIM/SFA/Help Desk
+
+- Separar contenido comercial de producto en PIM.
+- Crear preventa móvil y cobranza en campo.
+- Decidir separación final de Help Desk fuera de CRM.
+
+### Fase 5 — Analytics/Prevención/BI
+
+- Emitir eventos transaccionales.
+- Crear proyecciones y snapshots.
+- Construir dashboards por tenant, tienda, producto y canal.
+
+---
+
+## 🧪 Pruebas mínimas por sistema
+
+Cada sistema nuevo debe entrar con estas pruebas base:
+
+| Tipo | Qué debe validar |
+|---|---|
+| Domain | Reglas de negocio puras, estados inválidos y cálculos. |
+| Application | Licencia requerida, permisos, orquestación y DTOs. |
+| Infrastructure | Mapeos EF, filtros tenant, soft-delete y persistencia. |
+| Api | Status codes, autorización y contrato request/response. |
+| Integración | Flujos entre sistemas, por ejemplo POS → ERP → BI. |
+
+### Casos obligatorios multitenant
+
+- Un tenant no puede leer datos de otro tenant.
+- Un usuario sin permiso no puede ejecutar la acción.
+- Un tenant sin licencia no puede acceder al módulo.
+- Una suscripción vencida bloquea operaciones críticas.
+- Un cambio de licencia invalida cache y se refleja en la siguiente validación.
+
+---
+
+## 📌 Definición de terminado para un módulo
+
+Un módulo se considera construido cuando cumple todo esto:
+
+- Entidades y reglas principales en `Backend.Domain`.
+- Interfaces y DTOs en `Backend.Application`.
+- Implementación en `Backend.Infrastructure`.
+- DbSets/configuraciones/migración o ajuste de esquema.
+- Controller en `Backend-Api`.
+- Validación de licencia SaaS.
+- Validación de permisos por acción.
+- Auditoría de acciones sensibles.
+- Pruebas mínimas de dominio, aplicación e integración.
+- Registro en catálogo SaaS con sistema, módulo, submódulos, rutas e icono.
+
+---
+
+## 🗺️ Próximos pasos concretos
+
+1. Completar autorización declarativa con atributos `RequireSaasAccess` y `RequirePermission` en todos los controllers existentes.
+2. Terminar POS caja/pagos porque es el flujo operativo más cercano al usuario final.
+3. Exponer CRM por API para aprovechar entidades y servicios ya creados.
+4. Completar HR con servicios y controllers.
+5. Crear OMS como primer sistema nuevo dependiente de ERP/POS/CRM.
+6. Crear WMS y TMS después de que OMS ya produzca órdenes de fulfillment.
+7. Crear PIM antes de abrir integraciones ecommerce/marketplaces.
+8. Dejar BI y Analytics para cuando existan eventos confiables.

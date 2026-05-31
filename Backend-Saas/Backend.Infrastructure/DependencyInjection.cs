@@ -1,9 +1,19 @@
 namespace Backend.Infrastructure;
 
+using Backend.Application.BI.Services;
 using Backend.Application.Common.Interfaces;
 using Backend.Application.CRM.Services;
 using Backend.Application.ERP.Services;
+using Backend.Application.HelpDesk.Services;
+using Backend.Application.HR.Services;
+using Backend.Application.LossPrevention.Services;
+using Backend.Application.OMS.Services;
+using Backend.Application.PIM.Services;
 using Backend.Application.POS.Services;
+using Backend.Application.RetailAnalytics.Services;
+using Backend.Application.SFA.Services;
+using Backend.Application.TMS.Services;
+using Backend.Application.WMS.Services;
 using Backend.Domain.Common;
 using Backend.Infrastructure.Cache.Redis;
 using Backend.Infrastructure.Persistence.MongoDB;
@@ -54,6 +64,18 @@ public static class DependencyInjection
         services.AddScoped<ICrmOpportunityService, CrmOpportunityService>();
         services.AddScoped<ICrmSalesOrderService, CrmSalesOrderService>();
         services.AddScoped<ICrmSupportTicketService, CrmSupportTicketService>();
+        services.AddScoped<IHrEmployeeService, HrEmployeeService>();
+        services.AddScoped<IHrAttendanceService, HrAttendanceService>();
+        services.AddScoped<IHrPayrollService, HrPayrollService>();
+        services.AddScoped<IOmsOrderService, OmsOrderService>();
+        services.AddScoped<IWmsTaskService, WmsTaskService>();
+        services.AddScoped<ITmsRouteService, TmsRouteService>();
+        services.AddScoped<IPimProductContentService, PimProductContentService>();
+        services.AddScoped<ISfaFieldOrderService, SfaFieldOrderService>();
+        services.AddScoped<IHelpDeskTicketService, HelpDeskTicketService>();
+        services.AddScoped<IRetailAnalyticsService, RetailAnalyticsService>();
+        services.AddScoped<ILossPreventionService, LossPreventionService>();
+        services.AddScoped<IBiMetricsService, BiMetricsService>();
         services.AddScoped<IAdminUserService, AdminUserService>();
         services.AddScoped<IAdminRoleService, AdminRoleService>();
         services.AddScoped<IAuditService, MongoAuditService>();
