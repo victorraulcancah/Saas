@@ -5,6 +5,7 @@ using Backend.Domain.Common;
 using Backend.Domain.CRM.Entities;
 using Backend.Domain.ERP.Entities;
 using Backend.Domain.HR.Entities;
+using Backend.Domain.POS.Entities;
 using Backend.Domain.Saas.Entities;
 using Backend.SharedKernel.Common.Interfaces;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -69,6 +70,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<SalesOrder> SalesOrders => Set<SalesOrder>();
     public DbSet<SalesOrderItem> SalesOrderItems => Set<SalesOrderItem>();
     public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
+
+    public DbSet<PosSale> PosSales => Set<PosSale>();
+    public DbSet<PosSaleItem> PosSaleItems => Set<PosSaleItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
