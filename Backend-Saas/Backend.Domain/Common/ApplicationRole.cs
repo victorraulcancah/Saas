@@ -1,6 +1,6 @@
 namespace Backend.Domain.Common;
 
-using Backend.Domain.Common.Interfaces;
+using Backend.SharedKernel.Common.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 public class ApplicationRole : IdentityRole<Guid>, ITenantEntity, ISoftDelete

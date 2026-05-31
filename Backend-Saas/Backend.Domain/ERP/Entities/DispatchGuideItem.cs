@@ -1,7 +1,7 @@
 namespace Backend.Domain.ERP.Entities;
 
-using Backend.Domain.Common;
-using Backend.Domain.Common.Interfaces;
+using Backend.SharedKernel.Common;
+using Backend.SharedKernel.Common.Interfaces;
 
 public class DispatchGuideItem : BaseEntity, ISoftDelete
 {

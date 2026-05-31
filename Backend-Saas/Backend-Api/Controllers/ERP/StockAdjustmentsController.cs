@@ -19,12 +19,14 @@ namespace Backend_Api
         }
 
         [HttpGet]
+        [RequirePermission("erp.inventario.kardex.ver")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _inventory.GetStockAdjustmentsAsync());
         }
 
         [HttpPost]
+        [RequirePermission("erp.inventario.kardex.administrar")]
         public async Task<IActionResult> Create([FromBody] StockAdjustmentRequest request)
         {
             return Ok(await _inventory.CreateStockAdjustmentAsync(request));

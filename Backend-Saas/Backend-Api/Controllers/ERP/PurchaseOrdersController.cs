@@ -19,18 +19,21 @@ namespace Backend_Api
         }
 
         [HttpGet]
+        [RequirePermission("erp.compras-proveedores.ordenes-compra.ver")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _purchasing.GetPurchaseOrdersAsync());
         }
 
         [HttpPost]
+        [RequirePermission("erp.compras-proveedores.ordenes-compra.administrar")]
         public async Task<IActionResult> Create([FromBody] PurchaseOrderRequest request)
         {
             return Ok(await _purchasing.CreatePurchaseOrderAsync(request));
         }
 
         [HttpPost("{id:guid}/approve")]
+        [RequirePermission("erp.compras-proveedores.ordenes-compra.administrar")]
         public async Task<IActionResult> Approve(Guid id)
         {
             var order = await _purchasing.ApprovePurchaseOrderAsync(id);

@@ -19,12 +19,14 @@ namespace Backend_Api
         }
 
         [HttpGet]
+        [RequirePermission("erp.compras-proveedores.proveedores.ver")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _catalog.GetSuppliersAsync());
         }
 
         [HttpPost]
+        [RequirePermission("erp.compras-proveedores.proveedores.administrar")]
         public async Task<IActionResult> Create([FromBody] SupplierRequest request)
         {
             return Ok(await _catalog.CreateSupplierAsync(request));

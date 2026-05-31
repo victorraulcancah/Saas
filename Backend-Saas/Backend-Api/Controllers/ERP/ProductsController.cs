@@ -19,18 +19,21 @@ namespace Backend_Api
         }
 
         [HttpGet]
+        [RequirePermission("erp.inventario.productos.ver")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _catalog.GetProductsAsync());
         }
 
         [HttpPost]
+        [RequirePermission("erp.inventario.productos.administrar")]
         public async Task<IActionResult> Create([FromBody] ProductRequest request)
         {
             return Ok(await _catalog.CreateProductAsync(request));
         }
 
         [HttpPut("{id:guid}")]
+        [RequirePermission("erp.inventario.productos.administrar")]
         public async Task<IActionResult> Update(Guid id, [FromBody] ProductRequest request)
         {
             var product = await _catalog.UpdateProductAsync(id, request);

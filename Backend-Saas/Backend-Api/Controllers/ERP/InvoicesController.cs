@@ -19,18 +19,21 @@ namespace Backend_Api
         }
 
         [HttpGet]
+        [RequirePermission("erp.facturacion.comprobantes.ver")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _billing.GetInvoicesAsync());
         }
 
         [HttpPost]
+        [RequirePermission("erp.facturacion.comprobantes.administrar")]
         public async Task<IActionResult> Create([FromBody] InvoiceRequest request)
         {
             return Ok(await _billing.CreateInvoiceAsync(request));
         }
 
         [HttpPost("{id:guid}/mark-sent")]
+        [RequirePermission("erp.facturacion.comprobantes.administrar")]
         public async Task<IActionResult> MarkSent(Guid id)
         {
             var invoice = await _billing.MarkInvoiceSentAsync(id);

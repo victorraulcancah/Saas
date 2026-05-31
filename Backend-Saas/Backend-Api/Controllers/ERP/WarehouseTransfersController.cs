@@ -19,18 +19,21 @@ namespace Backend_Api
         }
 
         [HttpGet]
+        [RequirePermission("erp.inventario.almacenes.ver")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _inventory.GetWarehouseTransfersAsync());
         }
 
         [HttpPost]
+        [RequirePermission("erp.inventario.almacenes.administrar")]
         public async Task<IActionResult> Create([FromBody] WarehouseTransferRequest request)
         {
             return Ok(await _inventory.CreateWarehouseTransferAsync(request));
         }
 
         [HttpPost("{id:guid}/send")]
+        [RequirePermission("erp.inventario.almacenes.administrar")]
         public async Task<IActionResult> Send(Guid id)
         {
             var transfer = await _inventory.SendWarehouseTransferAsync(id);
@@ -38,6 +41,7 @@ namespace Backend_Api
         }
 
         [HttpPost("{id:guid}/receive")]
+        [RequirePermission("erp.inventario.almacenes.administrar")]
         public async Task<IActionResult> Receive(Guid id)
         {
             var transfer = await _inventory.ReceiveWarehouseTransferAsync(id);

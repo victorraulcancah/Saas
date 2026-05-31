@@ -19,12 +19,14 @@ namespace Backend_Api
         }
 
         [HttpGet]
+        [RequirePermission("erp.inventario.productos.ver")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _catalog.GetCategoriesAsync());
         }
 
         [HttpPost]
+        [RequirePermission("erp.inventario.productos.administrar")]
         public async Task<IActionResult> Create([FromBody] CategoryRequest request)
         {
             return Ok(await _catalog.CreateCategoryAsync(request));

@@ -19,18 +19,21 @@ namespace Backend_Api
         }
 
         [HttpGet]
+        [RequirePermission("erp.compras-proveedores.recepcion-mercaderia.ver")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _inventory.GetGoodsReceiptsAsync());
         }
 
         [HttpPost]
+        [RequirePermission("erp.compras-proveedores.recepcion-mercaderia.administrar")]
         public async Task<IActionResult> Create([FromBody] GoodsReceiptRequest request)
         {
             return Ok(await _inventory.CreateGoodsReceiptAsync(request));
         }
 
         [HttpPost("{id:guid}/post")]
+        [RequirePermission("erp.compras-proveedores.recepcion-mercaderia.administrar")]
         public async Task<IActionResult> Post(Guid id)
         {
             var receipt = await _inventory.PostGoodsReceiptAsync(id);

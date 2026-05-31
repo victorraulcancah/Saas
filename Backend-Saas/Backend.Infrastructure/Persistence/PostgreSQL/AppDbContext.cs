@@ -2,11 +2,11 @@ namespace Backend.Infrastructure.Persistence.PostgreSQL;
 
 using Backend.Application.Common.Interfaces;
 using Backend.Domain.Common;
-using Backend.Domain.Common.Interfaces;
 using Backend.Domain.CRM.Entities;
 using Backend.Domain.ERP.Entities;
 using Backend.Domain.HR.Entities;
 using Backend.Domain.Saas.Entities;
+using Backend.SharedKernel.Common.Interfaces;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -77,24 +77,28 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
 
         foreach (var entityType in builder.Model.GetEntityTypes())
         {
+            var parameter = Expression.Parameter(entityType.ClrType, "e");
+            Expression? filterBody = null;
+
             if (typeof(ITenantEntity).IsAssignableFrom(entityType.ClrType))
             {
-                var parameter = Expression.Parameter(entityType.ClrType, "e");
                 var property = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
                 var tenantId = _currentUser?.TenantId;
-                var body = tenantId.HasValue
+                filterBody = tenantId.HasValue
                     ? (Expression)Expression.Equal(property, Expression.Constant(tenantId.Value, typeof(Guid?)))
                     : Expression.Constant(true);
-                var lambda = Expression.Lambda(body, parameter);
-                entityType.SetQueryFilter(lambda);
             }
 
             if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
             {
-                var parameter = Expression.Parameter(entityType.ClrType, "e");
                 var property = Expression.Property(parameter, nameof(ISoftDelete.IsDeleted));
-                var body = Expression.Equal(property, Expression.Constant(false));
-                var lambda = Expression.Lambda(body, parameter);
+                var softDeleteBody = Expression.Equal(property, Expression.Constant(false));
+                filterBody = filterBody is null ? softDeleteBody : Expression.AndAlso(filterBody, softDeleteBody);
+            }
+
+            if (filterBody is not null)
+            {
+                var lambda = Expression.Lambda(filterBody, parameter);
                 entityType.SetQueryFilter(lambda);
             }
         }

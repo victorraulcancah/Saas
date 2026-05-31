@@ -18,6 +18,7 @@ namespace Backend_Api
         }
 
         [HttpGet]
+        [RequirePermission("erp.inventario.kardex.ver")]
         public async Task<IActionResult> GetAll([FromQuery] Guid? productId, [FromQuery] Guid? warehouseId)
         {
             return Ok(await _catalog.GetProductStocksAsync(productId, warehouseId));

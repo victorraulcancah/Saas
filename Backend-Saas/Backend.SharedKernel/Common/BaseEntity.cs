@@ -1,6 +1,8 @@
-namespace Backend.Domain.Common;
+namespace Backend.SharedKernel.Common;
 
-public abstract class BaseEntity
+using Backend.SharedKernel.Common.Interfaces;
+
+public abstract class BaseEntity : ISoftDelete
 {
     public Guid Id { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

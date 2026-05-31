@@ -1,4 +1,4 @@
-namespace Backend.Domain.Common.Interfaces;
+namespace Backend.SharedKernel.Common.Interfaces;
 
 public interface ITenantEntity
 {

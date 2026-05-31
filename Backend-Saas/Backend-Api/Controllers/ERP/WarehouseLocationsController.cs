@@ -19,12 +19,14 @@ namespace Backend_Api
         }
 
         [HttpGet("warehouse/{warehouseId:guid}")]
+        [RequirePermission("erp.inventario.almacenes.ver")]
         public async Task<IActionResult> GetByWarehouse(Guid warehouseId)
         {
             return Ok(await _catalog.GetWarehouseLocationsAsync(warehouseId));
         }
 
         [HttpPost]
+        [RequirePermission("erp.inventario.almacenes.administrar")]
         public async Task<IActionResult> Create([FromBody] WarehouseLocationRequest request)
         {
             return Ok(await _catalog.CreateWarehouseLocationAsync(request));

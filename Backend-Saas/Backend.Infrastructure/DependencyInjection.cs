@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<ISaasLicenseService, SaasLicenseService>();
         services.AddScoped<ISaasAccessService, SaasAccessService>();
         services.AddScoped<ISaasSubscriptionService, SaasSubscriptionService>();
+        services.AddScoped<IUserPermissionService, UserPermissionService>();
         services.AddScoped<ErpStockService>();
         services.AddScoped<IErpCatalogService, ErpCatalogService>();
         services.AddScoped<IErpInventoryService, ErpInventoryService>();
