@@ -42,3 +42,34 @@ public record OmnichannelOrderResponse(
     string Notes,
     IReadOnlyCollection<OmnichannelOrderItemResponse> Items,
     IReadOnlyCollection<FulfillmentAssignmentResponse> FulfillmentAssignments);
+
+public record SalesChannelRequest(string Name, string Code, SalesChannel.ChannelType Type, string? ApiEndpoint, string? ApiKey, string? Configuration);
+public record SalesChannelResponse(Guid Id, string Name, string Code, SalesChannel.ChannelType Type, string ApiEndpoint, bool IsActive);
+
+public record ChannelSyncLogRequest(Guid SalesChannelId, string SyncType);
+public record ChannelSyncLogResponse(
+    Guid Id,
+    Guid SalesChannelId,
+    string ChannelName,
+    string SyncType,
+    ChannelSyncLog.SyncStatus Status,
+    int RecordsProcessed,
+    int RecordsSuccess,
+    int RecordsFailed,
+    DateTime SyncStartedAt,
+    DateTime? SyncCompletedAt,
+    string ErrorMessage);
+
+public record OrderRouteRequest(Guid OmnichannelOrderId, Guid? WarehouseId, Guid? BranchId, string RoutingStrategy, int Priority);
+public record OrderRouteResponse(
+    Guid Id,
+    Guid OmnichannelOrderId,
+    string OrderNumber,
+    Guid? WarehouseId,
+    Guid? BranchId,
+    string RoutingStrategy,
+    decimal Distance,
+    decimal EstimatedCost,
+    int Priority,
+    OrderRoute.RouteStatus Status,
+    DateTime? AssignedAt);
